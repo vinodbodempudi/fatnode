@@ -1,0 +1,19 @@
+{
+  "name": "fathome",
+  "version": "0.0.0",
+  "description": "fathome server side",
+  "main": "fatserver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vinod",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "express": "~4.0.0",
+    "morgan": "~1.0.0",
+    "static-favicon": "~1.0.2",
+    "cookie-parser": "~1.0.1",
+    "body-parser": "~1.0.2",
+    "mongodb": "~1.4.0"
+  }
+}
