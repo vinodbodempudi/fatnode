@@ -1,0 +1,5 @@
+use fatcities
+
+db.cities.insert({city:"Hyderabad", locality:"Abids"})
+db.cities.insert({city:"Hyderabad", locality:"Adarsh Nagar"})
+db.cities.insert({city:"Hyderabad", locality:"Adibatla"})

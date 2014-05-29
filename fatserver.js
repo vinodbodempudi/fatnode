@@ -15,6 +15,9 @@ var bodyParser = require('body-parser');
 var FatUser = require('./fatUser').FatUser;
 var fatUser= new FatUser('localhost', 27017);
 
+var FatCities = require('./fatcities').FatCities;
+var fatCities= new FatCities('localhost', 27017);
+
 
 // view engine setup
 app.set('port', process.env.PORT || 3000);
@@ -78,6 +81,38 @@ app.get('/users/:email', function(req, res) {
 		}
 		else{
 			res.send(user);
+		}
+		});
+	});
+
+
+app.get('/cities', function(req, res) {
+ console.log("inside get cities method");
+ 
+    fatCities.list(function(error, cities){
+	    if(error){
+			res.send(error);
+		}
+		else{
+			res.send(cities);
+		}
+		});
+	
+	});
+
+
+app.get('/localities/:city', function(req, res) {
+ console.log("inside get localities method");
+   
+   var  city = req.params.city;
+   //console.log("city:"+city);
+   fatCities.getLocalities(city, function(error, localities){
+					
+		if(error){
+			res.send(error)
+		}
+		else{
+			res.send(localities);
 		}
 		});
 	});
