@@ -18,6 +18,8 @@ var fatUser= new FatUser('localhost', 27017);
 var FatCities = require('./fatcities').FatCities;
 var fatCities= new FatCities('localhost', 27017);
 
+var FatProperties = require('./fatproperties').FatProperties;
+var fatProperties = new FatProperties('localhost', 27017);
 
 // view engine setup
 app.set('port', process.env.PORT || 3000);
@@ -85,6 +87,57 @@ app.get('/users/:email', function(req, res) {
 		});
 	});
 
+app.post('/properties', function(req, res) {
+    console.log("inside post method");
+    var properties = req.body;
+	console.log(properties);
+     fatProperties.addProp(properties, function(error, properties){
+	    if(error){
+		   if(error.code==11000){
+			res.send({error:'Duplicate properties'});
+		   }
+		   else{
+		    res.send(error);
+		   }
+		}else{
+		   res.send(properties);
+		}
+	 });
+	 });
+
+app.get('/properties', function(req, res) {
+ console.log("inside get all method");
+ 
+    fatProperties.getAllList(function(error, properties){
+	    if(error){
+			res.send(error);
+		}
+		else{
+			res.send(properties);
+		}
+		});
+	
+});
+
+app.get('/properties/:city/:locality', function(req, res) {
+ console.log("inside find method");
+
+ 	var  city = req.params.city;
+    console.log("city:"+city);
+
+    var  locality = req.params.locality;
+    console.log("locality:"+locality);
+
+    fatProperties.list(city, locality, function(error, properties){
+	    if(error){
+			res.send(error);
+		}
+		else{
+			res.send(properties);
+		}
+		});
+	
+});
 
 app.get('/cities', function(req, res) {
  console.log("inside get cities method");
