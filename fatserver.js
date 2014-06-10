@@ -116,7 +116,21 @@ app.get('/properties', function(req, res) {
 			res.send(properties);
 		}
 		});
-	
+});
+
+app.get('/properties/:id', function(req, res) {
+ console.log("inside get all method");
+ 	var id = req.params.id;
+ 	console.log("id:"+id);
+ 	var document_id = new require('mongodb').ObjectID(id);
+    fatProperties.getProperty(document_id, function(error, property) {
+	    if(error){
+			res.send(error);
+		}
+		else{
+			res.send(property);
+		}
+		});
 });
 
 app.get('/properties/:city/:locality', function(req, res) {
