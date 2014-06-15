@@ -80,13 +80,21 @@ this.getCollection(function(error, properties_collection){
 	 		var newOptimizedProperty = new Object();
 	 		newOptimizedProperty._id = properties_results[i]._id;
 	 		newOptimizedProperty.mode = properties_results[i].details.mode;
-	 		newOptimizedProperty.price = properties_results[i].details.price.price;
+			if(properties_results[i].details.price) {
+				newOptimizedProperty.price = properties_results[i].details.price.price;
+			} else {
+				newOptimizedProperty.price = properties_results[i].details.monthlyRent;
+			}
+	 		
+			newOptimizedProperty.createdDate = properties_results[i].createdDate;
+			newOptimizedProperty.title = properties_results[i].details.title;
 	 		newOptimizedProperty.bedRooms = properties_results[i].details.bedRooms;
+			newOptimizedProperty.bathRooms = properties_results[i].details.bathRooms;
 	 		newOptimizedProperty._size = properties_results[i].details.area.plotOrLand.plotOrLand;
 	 		newOptimizedProperty.units = properties_results[i].details.area.plotOrLand.units;
 	 		newOptimizedProperty.locality = properties_results[i].user.locality;
 	 		newOptimizedProperty._type = properties_results[i].details['type'];
-	 		newOptimizedProperty.houseType = properties_results[i].details.houseType;
+	 		newOptimizedProperty.propertySubType = properties_results[i].details.propertySubType;
 	 		optimizingResults[i] = newOptimizedProperty;
 	 	};
      console.log(properties_results[0]);
