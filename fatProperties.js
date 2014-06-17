@@ -90,8 +90,10 @@ this.getCollection(function(error, properties_collection){
 			newOptimizedProperty.title = properties_results[i].details.title;
 	 		newOptimizedProperty.bedRooms = properties_results[i].details.bedRooms;
 			newOptimizedProperty.bathRooms = properties_results[i].details.bathRooms;
-	 		newOptimizedProperty._size = properties_results[i].details.area.plotOrLand.plotOrLand;
-	 		newOptimizedProperty.units = properties_results[i].details.area.plotOrLand.units;
+	 		newOptimizedProperty.builtUpSize = properties_results[i].details.area.builtUp.builtUp;
+	 		newOptimizedProperty.builtUpUnits = properties_results[i].details.area.builtUp.units;
+			newOptimizedProperty.perUnitPrice = properties_results[i].details.area.perUnitPrice;
+			newOptimizedProperty.priceUnit = properties_results[i].details.area.priceUnit;
 	 		newOptimizedProperty.locality = properties_results[i].user.locality;
 	 		newOptimizedProperty._type = properties_results[i].details['type'];
 	 		newOptimizedProperty.propertySubType = properties_results[i].details.propertySubType;
