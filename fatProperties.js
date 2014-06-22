@@ -88,6 +88,8 @@ this.getCollection(function(error, properties_collection){
 	 		
 			newOptimizedProperty.createdDate = properties_results[i].createdDate;
 			newOptimizedProperty.title = properties_results[i].details.title;
+			newOptimizedProperty.myLat = properties_results[i].details.myLat;
+			newOptimizedProperty.myLong = properties_results[i].details.myLong;
 	 		newOptimizedProperty.bedRooms = properties_results[i].details.bedRooms;
 			newOptimizedProperty.bathRooms = properties_results[i].details.bathRooms;
 	 		newOptimizedProperty.builtUpSize = properties_results[i].details.area.builtUp.builtUp;
