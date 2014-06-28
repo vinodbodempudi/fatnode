@@ -4,6 +4,10 @@ var Server = require('mongodb').Server;
 var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectId;
 
+var fs = require('fs');
+var AWS = require('aws-sdk'); 
+AWS.config.loadFromPath('./config.json');
+
 FatProperties = function(host, port){
 this.db = new Db('fatproperties', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
 this.db.open(function(){});
@@ -27,6 +31,36 @@ this.getCollection(function(error, properties_collection){
 	 }
 	 else{
 	    console.log(properties);
+	    var buffer =  new Buffer(properties[0].user.image, 'base64');
+	    var s3bucket = new AWS.S3();
+				s3bucket.createBucket(function() {
+				var d = {
+					Bucket: 'fathome-images',
+					//'Content-Type' : 'image/png',
+					Key: properties[0]._id+".jpg",	
+					Body: buffer,
+					ACL: 'public-read'
+					};				
+					s3bucket.putObject(d, function(err, res) {
+			if (err) {
+				console.log("Error uploading data: ", err);
+			} else {
+				console.log("Successfully uploaded data to myBucket/myKey");
+			}
+			});
+		});
+                /*var newPath = "C:\\fathome\\" + properties[0]._id+".png";
+                console.log('newPath' + newPath);
+                //write file to uploads/fullsize folder
+                fs.writeFile(newPath, buffer, 'base64', function (err) {
+
+                    if (err)
+                        console.log("There was an error writing to folder");
+                    else
+                        console.log(err);
+                    //res.redirect("/");
+
+            });*/
 		callback(null, properties);
 	 }
 	});
