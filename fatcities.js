@@ -46,7 +46,7 @@ FatCities.prototype.getLocalities = function(city, callback){
 this.getCollection(function(error, cities_collection){
   if(error) callback(error)
   else{
-    cities_collection.find({'city':city},{"locality":1}).sort({'locality':1}).toArray(function(error, localities){
+    cities_collection.find({'city':city}).sort({'locality':1}).toArray(function(error, localities){
 	 if(error) callback(error)
 	 else{
 	// console.log(localities);
