@@ -30,7 +30,7 @@ this.getCollection(function(error, properties_collection){
 		callback(error);
 	 }
 	 else{
-	    console.log(properties);
+	    /*console.log(properties);
 	    var buffer =  new Buffer(properties[0].user.image, 'base64');
 	    var s3bucket = new AWS.S3();
 				s3bucket.createBucket(function() {
