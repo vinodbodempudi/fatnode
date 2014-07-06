@@ -36,10 +36,12 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(favicon());
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.all('/*', function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -102,92 +104,118 @@ app.post('/properties', function(req, res) {
     console.log("inside post method");
     var properties = req.body;
 	log.info(properties);
-	var urls = new Object();
-	var count = 0;
+	var urls = {}, userImageUploaded = true, propertyImagesUploaded = true;
+	var count = 0, amazonS3Url='http://s3.amazonaws.com/';
     try{
-	if(properties.images.userImage) {
-	    	var buffer =  new Buffer(properties.images.userImage.data, 'base64');
-	    	var s3bucket = new AWS.S3();
-			s3bucket.createBucket(function() {
-			var d = {
-						Bucket: 'fathome-images',
-						//'Content-Type' : 'image/png',
-						Key: properties.property.user.name + "." + properties.images.userImage.ext,	
-						Body: buffer,
-						ACL: 'public-read'
-					};				
-					s3bucket.putObject(d, function(err, res) {
-					if (err) {
-						log.error("Error uploading data: ", err);
-					} else {
-						urls.userUrl = res;
-						log.info(res);
-						log.info("Successfully uploaded data to myBucket/myKey");
-					}
+		if(properties.images.userImage) {
+				userImageUploaded = false;
+				var buffer =  new Buffer(properties.images.userImage.data, 'base64');
+				var s3bucket = new AWS.S3();
+				var bucket = 'fathome-images'
+				var fileName = properties.property.user.name + "." + properties.images.userImage.ext;
+				s3bucket.createBucket(function() {
+				var d = {
+							Bucket: bucket,
+							//'Content-Type' : 'image/png',
+							Key: fileName,	
+							Body: buffer,
+							ACL: 'public-read'
+						};				
+						s3bucket.putObject(d, function(err, res) {
+							userImageUploaded = true;
+							if (err) {
+								log.error("Error uploading data: ", err);
+							} else {
+								urls.userUrl = amazonS3Url + bucket + '/' + fileName;
+								log.info("saved user photo success");
+							}
+							
+							saveProperty(properties, userImageUploaded, propertyImagesUploaded);
+					});
 				});
-			});
-	}
-	if(properties.images.propertyImages) {
-		var uuid = generateUUID();
-		var properties_Url = new Array();
-		var imageUrl;
-		for(var i=0; i<properties.images.propertyImages.length; i++) {
-			var currentImage =properties.images.propertyImages[i]; 
-	    	uploadToAmazonS3(currentImage, properties.property.user.city, properties.property.user.locality, uuid, properties_Url,i, properties);	
 		}
-		urls.propertyUrls = properties_Url;
-	}
-	 properties.property.urls = urls;
-
-     fatProperties.addProp(properties, function(error, properties){
-	    if(error){
-		   if(error.code==11000){
-		   	log.error(error + ' Duplicate properties');
-			res.send({error:'Duplicate properties'});
-		   }
-		   else{
-		   	log.info(error);
-		    res.send(error);
-		   }
-		}else{
-		   res.send(properties);
+		console.log("property images c0unt : " + properties.images.propertyImages.length);
+		if(properties.images.propertyImages) {
+			propertyImagesUploaded = false;
+			var uuid = generateUUID(), properties_Url = [], imageUrl, date = new Date();
+			var dateString = (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
+			var bucket = 'fathome-images/' + dateString + '/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
+			
+			for(var i=0; i<properties.images.propertyImages.length; i++) {
+				
+				var currentImage =properties.images.propertyImages[i]; 
+				(function uploadToAmazonS3(currentImage, count) {
+					
+						var imageUrl = {};
+						var buffer =  new Buffer(currentImage.data, 'base64');
+						var s3bucket = new AWS.S3();
+						var fileName = count+"."+currentImage.ext;
+						
+						s3bucket.createBucket(function() {
+						var d = {
+							Bucket: bucket,
+							Key: fileName,	
+							Body: buffer,
+							ACL: 'public-read'
+							};				
+							s3bucket.putObject(d, function(err, res) {
+								
+								if (err) {
+									log.error("Error uploading data: ", err);
+								} else {
+									imageUrl.url = amazonS3Url + bucket + '/' + fileName;;
+									if(currentImage.coverPhoto) {
+										imageUrl.coverPhoto = currentImage.coverPhoto;
+									}
+									properties_Url[count] = imageUrl;
+									log.info("Successfully uploaded image: " + count);
+								}
+								
+								if(count === properties.images.propertyImages.length-1) {
+									propertyImagesUploaded = true;
+									saveProperty(properties, userImageUploaded, propertyImagesUploaded);
+								}
+								
+							});
+					});	
+				}(currentImage, i))
+			}
+			urls.propertyUrls = properties_Url;
 		}
-	 });
+		properties.property.urls = urls;
+	 } catch(ex) {
+		console.log(ex);
+	 }
+	 
+	 
+	 var saveProperty = function (properties, userImageUploaded, propertyImagesUploaded) {
+		console.log("in saveProperty");
+		if(!propertyImagesUploaded || !userImageUploaded) {
+			return;
+		}
 
- } catch(ex) {
- 	log.error(ex);
- }
+		console.log("saving property");
+		fatProperties.addProp(properties, function(error, properties){
+			if(error){
+			   if(error.code==11000){
+				log.error(error + ' Duplicate properties');
+				res.send({error:'Duplicate properties'});
+			   }
+			   else{
+				log.info(error);
+				res.send(error);
+			   }
+			}else{
+			   res.send(properties);
+			}
+		 });
+
+	}
 });
 
-function uploadToAmazonS3(currentImage, city, locality, uuid, properties_Url, count, properties) {
-	var imageUrl = {};
-	var buffer =  new Buffer(currentImage.data, 'base64');
-	    	var s3bucket = new AWS.S3();
-	    	var date = new Date();
-	    	var dateString = (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
-			s3bucket.createBucket(function() {
-			var d = {
-				Bucket: 'fathome-images/' + dateString + '/' + city +'/'+locality+'/'+uuid,
-				//'Content-Type' : 'image/png',
-				Key: count+"."+currentImage.ext,	
-				Body: buffer,
-				ACL: 'public-read'
-				};				
-				s3bucket.putObject(d, function(err, res) {
-				if (err) {
-					log.error("Error uploading data: ", err);
-				} else {
-					imageUrl.url = res;
-					if(currentImage.coverPhoto) {
-						imageUrl.coverPhoto = currentImage.coverPhoto;
-					}
-					properties_Url[count] = imageUrl;
-					log.info(res);
-					console.log("Successfully uploaded data to myBucket/myKey");
-				}
-			});
-		});	
-}
+
+
+
 
 app.get('/properties', function(req, res) {
  console.log("inside get all method");

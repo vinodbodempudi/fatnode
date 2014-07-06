@@ -90,41 +90,53 @@ FatProperties.prototype.list = function(city, locality, callback){
 this.getCollection(function(error, properties_collection){
   if(error) callback(error)
   else{
-    properties_collection.find({"user.city":city, "user.locality":locality}, 
-    	{"details.mode":1, "details.createdDate":1, "details":1, "location":1, "user":1})
+    properties_collection.find({"user.city":city, "user.locality":locality})
     	.toArray(function(error, properties_results){
-	 if(error) callback(error);
-	 else{
-	 	/*var optimizingResults = new Array();
-	 	for (var i = 0; i < properties_results.length; i++) {
-	 		var newOptimizedProperty = new Object();
-	 		newOptimizedProperty._id = properties_results[i]._id;
-	 		newOptimizedProperty.mode = properties_results[i].details.mode;
-			if(properties_results[i].details.price) {
-				newOptimizedProperty.price = properties_results[i].details.price.price;
-			} else {
-				newOptimizedProperty.price = properties_results[i].details.monthlyRent;
-			}
-			newOptimizedProperty.createdDate = properties_results[i].createdDate;
-			newOptimizedProperty.title = properties_results[i].details.title;
-			if(properties_results[i].location) {
-				newOptimizedProperty.lat = properties_results[i].location.lat;
-				newOptimizedProperty.lng = properties_results[i].location.lng;
-			}
-	 		newOptimizedProperty.bedRooms = properties_results[i].details.bedRooms;
-			newOptimizedProperty.bathRooms = properties_results[i].details.bathRooms;
-	 		newOptimizedProperty.builtUpSize = properties_results[i].details.area.builtUp.builtUp;
-	 		newOptimizedProperty.builtUpUnits = properties_results[i].details.area.builtUp.units;
-			newOptimizedProperty.perUnitPrice = properties_results[i].details.area.perUnitPrice;
-			newOptimizedProperty.priceUnit = properties_results[i].details.area.priceUnit;
-	 		newOptimizedProperty.locality = properties_results[i].user.locality;
-	 		newOptimizedProperty._type = properties_results[i].details['type'];
-	 		newOptimizedProperty.propertySubType = properties_results[i].details.propertySubType;
-	 		optimizingResults[i] = newOptimizedProperty;*/
-	 	};
-     console.log(properties_results[0]);
-     callback(null, optimizingResults);
-	});
+		 if(error) callback(error);
+		 else{
+			var optimizingResults = new Array();
+			for (var i = 0; i < properties_results.length; i++) {
+				var newOptimizedProperty = new Object();
+				newOptimizedProperty._id = properties_results[i]._id;
+				newOptimizedProperty.mode = properties_results[i].details.mode;
+				if(properties_results[i].details.price) {
+					newOptimizedProperty.price = properties_results[i].details.price.price;
+				} else {
+					newOptimizedProperty.price = properties_results[i].details.monthlyRent;
+				}
+				newOptimizedProperty.createdDate = properties_results[i].createdDate;
+				newOptimizedProperty.title = properties_results[i].details.title;
+				if (properties_results[i].location) {
+					newOptimizedProperty.lat = properties_results[i].location.lat;
+					newOptimizedProperty.lng = properties_results[i].location.lng;
+				}
+				
+				if (properties_results[i].urls && properties_results[i].urls.propertyUrls) {
+					var propertyImage;
+					for (var k = 0; k < properties_results[i].urls.propertyUrls.length; k++) {
+						propertyImage = properties_results[i].urls.propertyUrls[k];
+						if(propertyImage.coverPhoto) {
+							newOptimizedProperty.coverPhotoUrl = propertyImage.url;
+							break;
+						}
+					}
+				}
+				
+				newOptimizedProperty.bedRooms = properties_results[i].details.bedRooms;
+				newOptimizedProperty.bathRooms = properties_results[i].details.bathRooms;
+				newOptimizedProperty.builtUpSize = properties_results[i].details.area.builtUp.builtUp;
+				newOptimizedProperty.builtUpUnits = properties_results[i].details.area.builtUp.units;
+				newOptimizedProperty.perUnitPrice = properties_results[i].details.area.perUnitPrice;
+				newOptimizedProperty.priceUnit = properties_results[i].details.area.priceUnit;
+				newOptimizedProperty.locality = properties_results[i].user.locality;
+				newOptimizedProperty._type = properties_results[i].details['type'];
+				newOptimizedProperty.propertySubType = properties_results[i].details.propertySubType;
+				optimizingResults[i] = newOptimizedProperty;
+			};
+		 console.log(properties_results[0]);
+		 callback(null, optimizingResults);
+		 }
+		});
 	}
 
 });
