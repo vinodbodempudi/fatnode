@@ -8,6 +8,10 @@ var fs = require('fs');
 var AWS = require('aws-sdk'); 
 AWS.config.loadFromPath('./config.json');
 
+var log4js = require( "log4js" );
+log4js.configure( "log4js.json" );
+var logger = log4js.getLogger( "test-file-appender" );
+
 FatProperties = function(host, port){
 this.db = new Db('fatproperties', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
 this.db.open(function(){});
@@ -15,55 +19,35 @@ this.db.open(function(){});
 
 FatProperties.prototype.getCollection=function(callback){
 this.db.collection('properties', function(error, properties_collection){
-   if(error) callback(error);
-   else callback(null, properties_collection);
+	try{
+   		if(error) 
+   			throw (error);
+   		else callback(null, properties_collection);
+	} catch (ex) {
+		callback(error);
+	}
 	});
 };
 
-FatProperties.prototype.addProp = function(properties, callback){
+FatProperties.prototype.addProp = function(properties, callback) {
 this.getCollection(function(error, properties_collection){
   if(error) callback(error)
   else{
-    properties_collection.insert(properties, {safe:true}, function(error, properties){
-	 if(error){
-	    console.log(error);
-		callback(error);
-	 }
-	 else{
-	    /*console.log(properties);
-	    var buffer =  new Buffer(properties[0].user.image, 'base64');
-	    var s3bucket = new AWS.S3();
-				s3bucket.createBucket(function() {
-				var d = {
-					Bucket: 'fathome-images',
-					//'Content-Type' : 'image/png',
-					Key: properties[0]._id+".jpg",	
-					Body: buffer,
-					ACL: 'public-read'
-					};				
-					s3bucket.putObject(d, function(err, res) {
-			if (err) {
-				console.log("Error uploading data: ", err);
-			} else {
-				console.log("Successfully uploaded data to myBucket/myKey");
-			}
-			});
-		});
-                /*var newPath = "C:\\fathome\\" + properties[0]._id+".png";
-                console.log('newPath' + newPath);
-                //write file to uploads/fullsize folder
-                fs.writeFile(newPath, buffer, 'base64', function (err) {
-
-                    if (err)
-                        console.log("There was an error writing to folder");
-                    else
-                        console.log(err);
-                    //res.redirect("/");
-
-            });*/
-		callback(null, properties);
-	 }
-	});
+    properties_collection.insert(properties.property, {safe:true}, function(error, properties){
+	 try{
+	 	if(error){
+	    	console.log(error);
+			throw (error);
+	 	}
+	 	else{
+	    	console.log(properties);
+	    	callback(null, properties);
+	    }
+	 } catch (ex) {
+		logger.error(ex);
+		callback(ex);
+	}
+});
 }
 
 });
@@ -106,10 +90,12 @@ FatProperties.prototype.list = function(city, locality, callback){
 this.getCollection(function(error, properties_collection){
   if(error) callback(error)
   else{
-    properties_collection.find({"user.city":city, "user.locality":locality}).toArray(function(error, properties_results){
+    properties_collection.find({"user.city":city, "user.locality":locality}, 
+    	{"details.mode":1, "details.createdDate":1, "details":1, "location":1, "user":1})
+    	.toArray(function(error, properties_results){
 	 if(error) callback(error);
 	 else{
-	 	var optimizingResults = new Array();
+	 	/*var optimizingResults = new Array();
 	 	for (var i = 0; i < properties_results.length; i++) {
 	 		var newOptimizedProperty = new Object();
 	 		newOptimizedProperty._id = properties_results[i]._id;
@@ -119,15 +105,12 @@ this.getCollection(function(error, properties_collection){
 			} else {
 				newOptimizedProperty.price = properties_results[i].details.monthlyRent;
 			}
-	 		
 			newOptimizedProperty.createdDate = properties_results[i].createdDate;
 			newOptimizedProperty.title = properties_results[i].details.title;
-			
 			if(properties_results[i].location) {
 				newOptimizedProperty.lat = properties_results[i].location.lat;
 				newOptimizedProperty.lng = properties_results[i].location.lng;
 			}
-			
 	 		newOptimizedProperty.bedRooms = properties_results[i].details.bedRooms;
 			newOptimizedProperty.bathRooms = properties_results[i].details.bathRooms;
 	 		newOptimizedProperty.builtUpSize = properties_results[i].details.area.builtUp.builtUp;
@@ -137,11 +120,10 @@ this.getCollection(function(error, properties_collection){
 	 		newOptimizedProperty.locality = properties_results[i].user.locality;
 	 		newOptimizedProperty._type = properties_results[i].details['type'];
 	 		newOptimizedProperty.propertySubType = properties_results[i].details.propertySubType;
-	 		optimizingResults[i] = newOptimizedProperty;
+	 		optimizingResults[i] = newOptimizedProperty;*/
 	 	};
      console.log(properties_results[0]);
      callback(null, optimizingResults);
-	 }
 	});
 	}
 
