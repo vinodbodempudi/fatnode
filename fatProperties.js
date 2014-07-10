@@ -124,7 +124,7 @@ this.getCollection(function(error, properties_collection){
 				
 				newOptimizedProperty.bedRooms = properties_results[i].details.bedRooms;
 				newOptimizedProperty.bathRooms = properties_results[i].details.bathRooms;
-				newOptimizedProperty.builtUpSize = properties_results[i].details.area.builtUp.builtUp;
+				newOptimizedProperty.builtUpSize = properties_results[i].details.area.builtUp.builtUpInSqft;
 				newOptimizedProperty.builtUpUnits = properties_results[i].details.area.builtUp.units;
 				newOptimizedProperty.perUnitPrice = properties_results[i].details.area.perUnitPrice;
 				newOptimizedProperty.priceUnit = properties_results[i].details.area.priceUnit;
