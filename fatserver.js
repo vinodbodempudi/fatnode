@@ -104,9 +104,9 @@ app.post('/properties', function(req, res) {
     console.log("inside post method");
     var properties = req.body;
 	log.info(properties);
-	var urls = {}, userImageUploaded = true, propertyImagesUploaded = true;
-	var count = 0, amazonS3Url='http://s3.amazonaws.com/';
+	var count = 0, amazonS3Url='http://s3.amazonaws.com/', userImageUploaded = true, propertyImagesUploaded = true;
     try{
+		properties.property.urls = {};
 		if(properties.images.userImage) {
 				userImageUploaded = false;
 				var buffer =  new Buffer(properties.images.userImage.data, 'base64');
@@ -114,7 +114,7 @@ app.post('/properties', function(req, res) {
 				var bucket = 'fathome-images'
 				var fileName = properties.property.user.name + "." + properties.images.userImage.ext;
 				s3bucket.createBucket(function() {
-				var d = {
+					var d = {
 							Bucket: bucket,
 							//'Content-Type' : 'image/png',
 							Key: fileName,	
@@ -126,7 +126,7 @@ app.post('/properties', function(req, res) {
 							if (err) {
 								log.error("Error uploading data: ", err);
 							} else {
-								urls.userUrl = amazonS3Url + bucket + '/' + fileName;
+								properties.property.urls.userUrl = amazonS3Url + bucket + '/' + fileName;
 								log.info("saved user photo success");
 							}
 							
@@ -137,10 +137,10 @@ app.post('/properties', function(req, res) {
 		console.log("property images c0unt : " + properties.images.propertyImages.length);
 		if(properties.images.propertyImages) {
 			propertyImagesUploaded = false;
-			var uuid = generateUUID(), properties_Url = [], imageUrl, date = new Date();
+			var uuid = generateUUID(), imageUrl, date = new Date();
 			var dateString = (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
 			var bucket = 'fathome-images/' + dateString + '/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
-			
+			properties.property.urls.propertyUrls = [];
 			for(var i=0; i<properties.images.propertyImages.length; i++) {
 				
 				var currentImage =properties.images.propertyImages[i]; 
@@ -167,7 +167,7 @@ app.post('/properties', function(req, res) {
 									if(currentImage.coverPhoto) {
 										imageUrl.coverPhoto = currentImage.coverPhoto;
 									}
-									properties_Url[count] = imageUrl;
+									properties.property.urls.propertyUrls[count] = imageUrl;
 									log.info("Successfully uploaded image: " + count);
 								}
 								
@@ -180,11 +180,10 @@ app.post('/properties', function(req, res) {
 					});	
 				}(currentImage, i))
 			}
-			urls.propertyUrls = properties_Url;
 		}
-		properties.property.urls = urls;
+		
 	 } catch(ex) {
-		console.log(ex);
+		log.error(ex);
 	 }
 	 
 	 
