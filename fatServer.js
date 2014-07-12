@@ -21,8 +21,8 @@ var fatCities= new FatCities('localhost', 27017);
 var FatProperties = require('./fatProperties').FatProperties;
 var fatProperties = new FatProperties('localhost', 27017);
 
-var FatFeedback = require('./fatFeedback').FatFeedback;
-var fatFeedback= new FatFeedback('localhost', 27017); 
+//var FatFeedback = require('./fatFeedback').FatFeedback;
+//var fatFeedback= new FatFeedback('localhost', 27017); 
 
 var fs = require('fs');
 var AWS = require('aws-sdk'); 
