@@ -15,11 +15,14 @@ var bodyParser = require('body-parser');
 var FatUser = require('./fatUser').FatUser;
 var fatUser= new FatUser('localhost', 27017);
 
-var FatCities = require('./fatcities').FatCities;
+var FatCities = require('./fatCities').FatCities;
 var fatCities= new FatCities('localhost', 27017);
 
-var FatProperties = require('./fatproperties').FatProperties;
+var FatProperties = require('./fatProperties').FatProperties;
 var fatProperties = new FatProperties('localhost', 27017);
+
+var FatFeedback = require('./fatFeedback').FatFeedback;
+var fatFeedback= new FatFeedback('localhost', 27017); 
 
 var fs = require('fs');
 var AWS = require('aws-sdk'); 
@@ -310,6 +313,8 @@ app.get('/', function(req, res) {
 			res.send('Hello World!');		
 	
 });
+
+
 
 http.createServer(app).listen(app.get('port'), function(){
   log.info('Express server listening on port ' + app.get('port'));
