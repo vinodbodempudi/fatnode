@@ -115,7 +115,7 @@ this.getCollection(function(error, properties_collection){
 					var propertyImage;
 					for (var k = 0; k < properties_results[i].urls.propertyUrls.length; k++) {
 						propertyImage = properties_results[i].urls.propertyUrls[k];
-						if(propertyImage.coverPhoto) {
+						if(propertyImage && propertyImage.coverPhoto) {
 							newOptimizedProperty.coverPhotoUrl = propertyImage.url;
 							break;
 						}

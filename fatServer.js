@@ -110,15 +110,21 @@ app.post('/properties', function(req, res) {
 	var count = 0, amazonS3Url='http://s3.amazonaws.com/', userImageUploaded = true, propertyImagesUploaded = true;
     try{
 		properties.property.urls = {};
+		var uuid = generateUUID()
 		if(properties.images.userImage) {
 				userImageUploaded = false;
 				var buffer =  new Buffer(properties.images.userImage.data, 'base64');
 				var s3bucket = new AWS.S3();
-				var bucket = 'fathome-images'
+				var userPhotoBucket;
+				if(properties.property.user.type === 'Agent' ) {
+					userPhotoBucket = 'fathome-images/agent/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
+				} else {
+					userPhotoBucket = 'fathome-images/builder/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
+				}
 				var fileName = properties.property.user.name + "." + properties.images.userImage.ext;
 				s3bucket.createBucket(function() {
 					var d = {
-							Bucket: bucket,
+							Bucket: userPhotoBucket,
 							//'Content-Type' : 'image/png',
 							Key: fileName,	
 							Body: buffer,
@@ -129,7 +135,7 @@ app.post('/properties', function(req, res) {
 							if (err) {
 								log.error("Error uploading data: ", err);
 							} else {
-								properties.property.urls.userUrl = amazonS3Url + bucket + '/' + fileName;
+								properties.property.urls.userUrl = amazonS3Url + userPhotoBucket + '/' + fileName;
 								log.info("saved user photo success");
 							}
 							
@@ -140,9 +146,9 @@ app.post('/properties', function(req, res) {
 		console.log("property images c0unt : " + properties.images.propertyImages.length);
 		if(properties.images.propertyImages) {
 			propertyImagesUploaded = false;
-			var uuid = generateUUID(), imageUrl, date = new Date();
+			var imageUrl, date = new Date();
 			var dateString = (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
-			var bucket = 'fathome-images/' + dateString + '/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
+			var propertyBucket = 'fathome-images/' + dateString + '/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
 			properties.property.urls.propertyUrls = [];
 			for(var i=0; i<properties.images.propertyImages.length; i++) {
 				
@@ -156,7 +162,7 @@ app.post('/properties', function(req, res) {
 						
 						s3bucket.createBucket(function() {
 						var d = {
-							Bucket: bucket,
+							Bucket: propertyBucket,
 							Key: fileName,	
 							Body: buffer,
 							ACL: 'public-read'
@@ -166,7 +172,7 @@ app.post('/properties', function(req, res) {
 								if (err) {
 									log.error("Error uploading data: ", err);
 								} else {
-									imageUrl.url = amazonS3Url + bucket + '/' + fileName;;
+									imageUrl.url = amazonS3Url + propertyBucket + '/' + fileName;;
 									if(currentImage.coverPhoto) {
 										imageUrl.coverPhoto = currentImage.coverPhoto;
 									}
