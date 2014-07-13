@@ -21,8 +21,8 @@ var fatCities= new FatCities('localhost', 27017);
 var FatProperties = require('./fatProperties').FatProperties;
 var fatProperties = new FatProperties('localhost', 27017);
 
-//var FatFeedback = require('./fatFeedback').FatFeedback;
-//var fatFeedback= new FatFeedback('localhost', 27017); 
+var FatFeedback = require('./fatFeedback').FatFeedback;
+var fatFeedback= new FatFeedback('localhost', 27017); 
 
 var fs = require('fs');
 var AWS = require('aws-sdk'); 
@@ -312,6 +312,23 @@ app.get('/', function(req, res) {
 			res.send('Hello World!');		
 	
 });
+
+
+
+app.post('/feedback', function(req, res) {
+    console.log("inside post feedback method");
+
+    var feedback = req.body;
+	console.log(feedback);
+     fatFeedback.saveFeedback(feedback, function(error, feedback){
+	    if(error){
+		   log.error(error + 'could not save feedback');
+		
+		}else{
+		   res.send(feedback);
+		}
+	 });
+	 });
 
 
 

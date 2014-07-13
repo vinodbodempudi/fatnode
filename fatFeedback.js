@@ -4,75 +4,30 @@ var Server = require('mongodb').Server;
 var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectId;
 
-FatUser = function(host, port){
+FatFeedback = function(host, port){
 this.db = new Db('fatDB', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
 this.db.open(function(){});
 };
 
-FatUser.prototype.getCollection=function(callback){
-this.db.collection('feedback', function(error, users_collection){
+FatFeedback.prototype.getCollection=function(callback){
+this.db.collection('feedback', function(error, feedback_collection){
    if(error) callback(error);
-   else {
-      users_collection.ensureIndex({email:1}, {unique:true}, function(error, indexName) {
-		if(error) callback(error);
-		else
-			callback(null, users_collection);
-		});
-	  }
+   else callback(null, feedback_collection);
+	
 	});
 };
 
-FatUser.prototype.addUser = function(user, callback){
-this.getCollection(function(error, users_collection){
+FatFeedback.prototype.saveFeedback = function(feedback, callback){
+this.getCollection(function(error, feedback_collection){
   if(error) callback(error)
   else{
-    users_collection.insert(user, {safe:true}, function(error, user){
-	 if(error){
-	    console.log(error);
-		callback(error);
-	 }
-	 else{
-	    console.log(user);
-		callback(null, user);
-	 }
+    feedback_collection.insert(feedback, function(){
+	 callback(null, feedback);
 	});
 }
 
 });
 };
 
-FatUser.prototype.findByEmail = function(email, callback){
-this.getCollection(function(error, users_collection){
-  if(error) callback(error)
-  else{
-    users_collection.find({'email':email}).nextObject( function(error, result){
-	 if(error) callback(error)
-	 else{
-	 console.log(result);
-     callback(null, result)
-	 }
-	});
-	}
+exports.FatFeedback = FatFeedback;
 
-});
-};
-
-
-FatUser.prototype.list = function(callback){
-this.getCollection(function(error, users_collection){
-  if(error) callback(error)
-  else{
-    users_collection.find().toArray(function(error, results){
-	 if(error) callback(error)
-	 else{
-     console.log(results[0]);
-     callback(null, results)
-	 }
-	});
-	}
-
-});
-};
-
-
-exports.FatUser = FatUser;
