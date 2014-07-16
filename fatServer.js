@@ -219,6 +219,9 @@ app.post('/properties', function(req, res) {
 		 });
 
 	}
+	
+	saveProperty(properties, userImageUploaded, propertyImagesUploaded);
+	
 });
 
 
