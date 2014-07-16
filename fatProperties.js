@@ -29,6 +29,18 @@ this.db.collection('properties', function(error, properties_collection){
 	});
 };
 
+FatProperties.prototype.getAgentBuilderCollection=function(callback){
+this.db.collection('properties', function(error, agentBuilder_collection){
+	try{
+   		if(error) 
+   			throw (error);
+   		else callback(null, agentBuilder_collection);
+	} catch (ex) {
+		callback(error);
+	}
+	});
+};
+
 FatProperties.prototype.addProp = function(properties, callback) {
 this.getCollection(function(error, properties_collection){
   if(error) callback(error)
@@ -42,6 +54,30 @@ this.getCollection(function(error, properties_collection){
 	 	else{
 	    	console.log(properties);
 	    	callback(null, properties);
+	    }
+	 } catch (ex) {
+		logger.error(ex);
+		callback(ex);
+	}
+});
+}
+
+});
+};
+
+FatProperties.prototype.addAgentBuilderDetails = function(user, callback) {
+this.getAgentBuilderCollection(function(error, agentBuilder_collection){
+  if(error) callback(error)
+  else{
+    agentBuilder_collection.insert(user, {safe:true}, function(error, user){
+	 try{
+	 	if(error){
+	    	console.log(error);
+			throw (error);
+	 	}
+	 	else{
+	    	console.log(user);
+	    	callback(null, user);
 	    }
 	 } catch (ex) {
 		logger.error(ex);

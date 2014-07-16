@@ -202,6 +202,9 @@ app.post('/properties', function(req, res) {
 			return;
 		}
 
+		console.log("Saving Agent and Builder details");
+		saveAgentBuilderDetails(properties);
+
 		console.log("saving property");
 		fatProperties.addProp(properties, function(error, properties){
 			if(error){
@@ -217,7 +220,18 @@ app.post('/properties', function(req, res) {
 			   res.send(properties);
 			}
 		 });
+	}
 
+	var saveAgentBuilderDetails = function(properties) {
+		var user = properties.property.user;
+		if(properties.property.urls.userUrl) {
+			user.userUrl = properties.property.urls.userUrl;
+		}
+		fatProperties.addAgentBuilderDetails(user, function(error, user){
+			if(error){
+				log.error(error);
+			}
+		 });
 	}
 	
 	saveProperty(properties, userImageUploaded, propertyImagesUploaded);
