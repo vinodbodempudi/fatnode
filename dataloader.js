@@ -1,4 +1,4 @@
-use fatcities
+use fatDB
 
 db.cities.insert({city:"Hyderabad", locality:"Abids", lat:"17.3918335", long:"78.4732169"})
 db.cities.insert({city:"Hyderabad", locality:"Adarsh Nagar", lat:"17.404724", long:"78.4732829"})
