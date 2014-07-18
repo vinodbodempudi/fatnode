@@ -5,7 +5,7 @@ var BSON = require('mongodb').BSON;
 var ObjectID = require('mongodb').ObjectId;
 
 FatUser = function(host, port){
-this.db = new Db('fatuser', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
+this.db = new Db('fatDB', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
 this.db.open(function(){});
 };
 

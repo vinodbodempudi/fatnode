@@ -9,7 +9,7 @@ log4js.configure( "log4js.json" );
 var logger = log4js.getLogger( "test-file-appender" );
 
 FatCities = function(host, port){
-this.db = new Db('fatcities', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
+this.db = new Db('fatDB', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
 this.db.open(function(){});
 };
 
