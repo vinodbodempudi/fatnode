@@ -13,7 +13,7 @@ log4js.configure( "log4js.json" );
 var logger = log4js.getLogger( "test-file-appender" );
 
 FatProperties = function(host, port){
-this.db = new Db('fatproperties', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
+this.db = new Db('fatDB', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
 this.db.open(function(){});
 };
 
