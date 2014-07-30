@@ -174,8 +174,10 @@ app.post('/properties', function(req, res) {
 									imageUrl.url = amazonS3Url + propertyBucket + '/' + fileName;;
 									if(currentImage.coverPhoto) {
 										imageUrl.coverPhoto = currentImage.coverPhoto;
+										properties.property.urls.coverPhotoUrl=imageUrl
 									}
 									properties.property.urls.propertyUrls[count] = imageUrl;
+									log.info("imageurl " + imageUrl.url);
 									log.info("Successfully uploaded image: " + count);
 								}
 								
@@ -266,7 +268,7 @@ app.get('/properties/:id', function(req, res) {
 			res.send("Something went wrong please try again");
 		}
 		else{
-			log.info(property);
+			//log.info(property);
 			res.send(property);
 		}
 		});

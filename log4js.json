@@ -8,7 +8,7 @@
         "category": "app"
     } , {
         "type": "dateFile",
-        "filename": "fat-home.log",
+        "filename": "logs/fat-home.log",
         "pattern": "-yyyy-MM-dd",
         "layout": {
             "type": "pattern",

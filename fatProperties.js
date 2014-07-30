@@ -13,7 +13,7 @@ log4js.configure( "log4js.json" );
 var logger = log4js.getLogger( "test-file-appender" );
 
 FatProperties = function(host, port){
-this.db = new Db('fatDB', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
+this.db = new Db('fatproperties', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
 this.db.open(function(){});
 };
 
@@ -52,11 +52,11 @@ this.getCollection(function(error, properties_collection){
 			throw (error);
 	 	}
 	 	else{
-	    	console.log(properties);
+	    	//console.log(properties);
 	    	callback(null, properties);
 	    }
 	 } catch (ex) {
-		logger.error(ex);
+		//logger.error(ex);
 		callback(ex);
 	}
 });
@@ -76,11 +76,11 @@ this.getAgentBuilderCollection(function(error, agentBuilder_collection){
 			throw (error);
 	 	}
 	 	else{
-	    	console.log(user);
+	    	//console.log(user);
 	    	callback(null, user);
 	    }
 	 } catch (ex) {
-		logger.error(ex);
+		//logger.error(ex);
 		callback(ex);
 	}
 });
@@ -113,7 +113,7 @@ this.getCollection(function(error, properties_collection){
      properties_collection.findOne({'_id': id}, function(error, result){
 	 if(error) callback(error)
 	 else{
-     console.log(result);
+     //console.log(result);
      callback(null, result)
 	 }
 	});
@@ -170,7 +170,7 @@ this.getCollection(function(error, properties_collection){
 				newOptimizedProperty.propertySubType = properties_results[i].details.propertySubType;
 				optimizingResults[i] = newOptimizedProperty;
 			};
-		 console.log(properties_results[0]);
+		 //console.log(properties_results[0]);
 		 callback(null, optimizingResults);
 		 }
 		});
@@ -179,5 +179,30 @@ this.getCollection(function(error, properties_collection){
 });
 };
 
+
+
+FatProperties.prototype.newlist = function(city, locality, callback){
+this.getCollection(function(error, properties_collection){
+  if(error) callback(error)
+  else{
+    properties_collection.find({"user.city":city, "user.locality":locality},
+    	{"details.mode":1 , "details.price.price":1, "details.monthlyRent":1, "createdDate":1, "details.title":1, "location.lat":1, "location.lng":1
+    	,"details.bedRooms":1, "details.bathRooms":1, "details.area.builtUp.builtUp":1, "details.area.builtUp.builtUpInSqft":1, "details.area.builtUp.units":1
+    	,"details.area.perUnitPrice":1, "details.area.priceUnit":1, "user.locality":1, "details.propertySubType":1}).toArray(function(error, properties){
+		 if(error)
+		 {
+		  console.log(error);
+		  callback(error);
+
+		 }
+		 else{
+		 console.log(properties)	
+		 callback(null, properties);
+		 }
+		});
+	}
+
+});
+};
  
 exports.FatProperties = FatProperties;
