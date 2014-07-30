@@ -122,7 +122,7 @@ this.getCollection(function(error, properties_collection){
 });
 };
 
-FatProperties.prototype.list = function(city, locality, callback){
+FatProperties.prototype.oldlist = function(city, locality, callback){
 this.getCollection(function(error, properties_collection){
   if(error) callback(error)
   else{
@@ -181,23 +181,23 @@ this.getCollection(function(error, properties_collection){
 
 
 
-FatProperties.prototype.newlist = function(city, locality, callback){
+FatProperties.prototype.list = function(city, locality, callback){
 this.getCollection(function(error, properties_collection){
   if(error) callback(error)
   else{
     properties_collection.find({"user.city":city, "user.locality":locality},
     	{"details.mode":1 , "details.price.price":1, "details.monthlyRent":1, "createdDate":1, "details.title":1, "location.lat":1, "location.lng":1
     	,"details.bedRooms":1, "details.bathRooms":1, "details.area.builtUp.builtUp":1, "details.area.builtUp.builtUpInSqft":1, "details.area.builtUp.units":1
-    	,"details.area.perUnitPrice":1, "details.area.priceUnit":1, "user.locality":1, "details.propertySubType":1}).toArray(function(error, properties){
+    	,"details.area.perUnitPrice":1, "details.area.priceUnit":1, "user.locality":1, "details.propertySubType":1, "urls.coverPhotoUrl.url":1}).toArray(function(error, properties){
 		 if(error)
 		 {
-		  console.log(error);
-		  callback(error);
+		  	console.log(error);
+		  	callback(error);
 
 		 }
 		 else{
-		 console.log(properties)	
-		 callback(null, properties);
+		 	console.log(properties)	
+		 	callback(null, properties);
 		 }
 		});
 	}
