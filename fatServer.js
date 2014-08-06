@@ -103,7 +103,7 @@ app.get('/users/:email', function(req, res) {
 	});
 
 app.post('/properties', function(req, res) {
-    console.log("inside post method");
+    
     var properties = req.body;
 	log.info(properties);
 	var count = 0, amazonS3Url='http://s3.amazonaws.com/', userImageUploaded = true, propertyImagesUploaded = true;
@@ -142,7 +142,7 @@ app.post('/properties', function(req, res) {
 					});
 				});
 		}
-		console.log("property images c0unt : " + properties.images.propertyImages.length);
+		log.info("property images c0unt : " + properties.images.propertyImages.length);
 		if(properties.images.propertyImages) {
 			propertyImagesUploaded = false;
 			var imageUrl, date = new Date();
@@ -170,18 +170,20 @@ app.post('/properties', function(req, res) {
 								
 								if (err) {
 									log.error("Error uploading data: ", err);
+									properties.property.urls.propertyUrls[properties.property.urls.propertyUrls.length] = null;
 								} else {
 									imageUrl.url = amazonS3Url + propertyBucket + '/' + fileName;;
 									if(currentImage.coverPhoto) {
 										imageUrl.coverPhoto = currentImage.coverPhoto;
 										properties.property.urls.coverPhotoUrl=imageUrl
 									}
-									properties.property.urls.propertyUrls[count] = imageUrl;
+									properties.property.urls.propertyUrls[properties.property.urls.propertyUrls.length] = imageUrl;
 									log.info("imageurl " + imageUrl.url);
-									log.info("Successfully uploaded image: " + count);
+									log.info("array count " + properties.property.urls.propertyUrls.length);
+									log.info("Successfully uploaded image: count " + count);
 								}
 								
-								if(count === properties.images.propertyImages.length-1) {
+								if(properties.property.urls.propertyUrls.length === properties.images.propertyImages.length-1) {
 									propertyImagesUploaded = true;
 									saveProperty(properties, userImageUploaded, propertyImagesUploaded);
 								}
@@ -198,15 +200,15 @@ app.post('/properties', function(req, res) {
 	 
 	 
 	 var saveProperty = function (properties, userImageUploaded, propertyImagesUploaded) {
-		console.log("in saveProperty");
+		
 		if(!propertyImagesUploaded || !userImageUploaded) {
 			return;
 		}
 
-		console.log("Saving Agent and Builder details");
+		log.info("Saving Agent and Builder details");
 		saveAgentBuilderDetails(properties);
 
-		console.log("saving property");
+		log.info("saving property");
 		fatProperties.addProp(properties, function(error, properties){
 			if(error){
 			   if(error.code==11000){
@@ -244,7 +246,6 @@ app.post('/properties', function(req, res) {
 
 
 app.get('/properties', function(req, res) {
- console.log("inside get all method");
  
     fatProperties.getAllList(function(error, properties){
 	    if(error){
@@ -258,9 +259,8 @@ app.get('/properties', function(req, res) {
 });
 
 app.get('/properties/:id', function(req, res) {
- console.log("inside get all method");
+ 
  	var id = req.params.id;
- 	console.log("id:"+id);
  	var document_id = new require('mongodb').ObjectID(id);
     fatProperties.getProperty(document_id, function(error, property) {
 	    if(error){
@@ -275,13 +275,11 @@ app.get('/properties/:id', function(req, res) {
 });
 
 app.get('/properties/:city/:locality', function(req, res) {
- console.log("inside find method");
-
+ 
  	var  city = req.params.city;
-    console.log("city:"+city);
-
     var  locality = req.params.locality;
-    console.log("locality:"+locality);
+    
+    log.info("get properties for city: " + city + " locality "+locality);
 
     fatProperties.list(city, locality, function(error, properties){
 	    if(error){
@@ -296,7 +294,6 @@ app.get('/properties/:city/:locality', function(req, res) {
 });
 
 app.get('/cities', function(req, res) {
- console.log("inside get cities method");
  
     fatCities.list(function(error, cities){
 	    if(error){
@@ -312,10 +309,9 @@ app.get('/cities', function(req, res) {
 
 
 app.get('/localities/:city', function(req, res) {
- console.log("inside get localities method");
    
    var  city = req.params.city;
-   //console.log("city:"+city);
+   log.info("get localities for city: " + city);
    fatCities.getLocalities(city, function(error, localities){
 					
 		if(error){
@@ -340,13 +336,11 @@ app.get('/', function(req, res) {
 
 
 app.post('/feedback', function(req, res) {
-    console.log("inside post feedback method");
-
+    
     var feedback = req.body;
-	console.log(feedback);
-     fatFeedback.saveFeedback(feedback, function(error, feedback){
+	fatFeedback.saveFeedback(feedback, function(error, feedback){
 	    if(error){
-		   log.error(error + 'could not save feedback');
+		   log.error(error + 'could not save feedback' + feedback);
 		
 		}else{
 		   res.send(feedback);

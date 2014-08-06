@@ -15,7 +15,10 @@ this.db.open(function(){});
 
 FatCities.prototype.getCollection=function(callback){
 this.db.collection('cities', function(error, cities_collection){
-   if(error) callback(error);
+   if(error) {
+	logger.error(error);
+   	callback(error);
+   }
    else callback(null, cities_collection);
 	
 	});
@@ -24,12 +27,15 @@ this.db.collection('cities', function(error, cities_collection){
 
 FatCities.prototype.list = function(callback){
 this.getCollection(function(error, cities_collection){
-   //console.log("inside DB");	
-  if(error) callback(error)
+   	
+  if(error) {
+	logger.error(error);
+   	callback(error);
+   }
   else{
     cities_collection.distinct('city', function(error, cities){
 	 if(error) {
-	 	logger.debug(error);
+	 	logger.error(error);
 	 	callback(error);
 	 }
 	 else{
@@ -44,13 +50,18 @@ this.getCollection(function(error, cities_collection){
 
 FatCities.prototype.getLocalities = function(city, callback){
 this.getCollection(function(error, cities_collection){
-  if(error) callback(error)
+  if(error) {
+	logger.error(error);
+   	callback(error);
+   }
   else{
     cities_collection.find({'city':city}).sort({'locality':1}).toArray(function(error, localities){
-	 if(error) callback(error)
+	 if(error) {
+		logger.error(error);
+	   	callback(error);
+   		}
 	 else{
-	// console.log(localities);
-     callback(null, localities)
+	 callback(null, localities)
 	 }
 	});
 	}
