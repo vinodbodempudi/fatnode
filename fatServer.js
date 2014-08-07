@@ -12,8 +12,11 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var FatUser = require('./fatUser').FatUser;
-var fatUser= new FatUser('localhost', 27017);
+//var FatUser = require('./fatUser').FatUser;
+//var fatUser= new FatUser('localhost', 27017);
+
+var FatProfile = require('./fatProfile').FatProfile;
+var FatProfile= new FatProfile('localhost', 27017);
 
 var FatCities = require('./fatCities').FatCities;
 var fatCities= new FatCities('localhost', 27017);
@@ -51,56 +54,56 @@ app.all('/*', function(req, res, next) {
     next();
 });
 
-app.post('/users', function(req, res) {
-    console.log("inside post method");
-    var user = req.body;
-	console.log(user);
-     fatUser.addUser(user, function(error, user){
-	    if(error){
-		   if(error.code==11000){
-		    log.error(error + 'Duplicate User');
-			res.send({error:'Duplicate User'});
-		   }
-		   else{
-		    res.send(error);
-		   }
-		}else{
-		   res.send(user);
-		}
-	 });
-	 });
+// app.post('/users', function(req, res) {
+//     console.log("inside post method");
+//     var user = req.body;
+// 	console.log(user);
+//      fatUser.addUser(user, function(error, user){
+// 	    if(error){
+// 		   if(error.code==11000){
+// 		    log.error(error + 'Duplicate User');
+// 			res.send({error:'Duplicate User'});
+// 		   }
+// 		   else{
+// 		    res.send(error);
+// 		   }
+// 		}else{
+// 		   res.send(user);
+// 		}
+// 	 });
+// 	 });
 	 
-app.get('/users', function(req, res) {
- console.log("inside get all method");
+// app.get('/users', function(req, res) {
+//  console.log("inside get all method");
  
-    fatUser.list(function(error, users){
-	    if(error){
-	    	log.error(error);
-			res.send(error);
-		}
-		else{
-			res.send(users);
-		}
-		});
+//     fatUser.list(function(error, users){
+// 	    if(error){
+// 	    	log.error(error);
+// 			res.send(error);
+// 		}
+// 		else{
+// 			res.send(users);
+// 		}
+// 		});
 	
-	});
+// 	});
 
-app.get('/users/:email', function(req, res) {
- console.log("inside get method");
+// app.get('/users/:email', function(req, res) {
+//  console.log("inside get method");
    
-   var  email = req.params.email;
-   console.log("email:"+email);
-   fatUser.findByEmail(email, function(error, user){
+//    var  email = req.params.email;
+//    console.log("email:"+email);
+//    fatUser.findByEmail(email, function(error, user){
 					
-		if(error){
-			log.error(error);
-			res.send(error)
-		}
-		else{
-			res.send(user);
-		}
-		});
-	});
+// 		if(error){
+// 			log.error(error);
+// 			res.send(error)
+// 		}
+// 		else{
+// 			res.send(user);
+// 		}
+// 		});
+// 	});
 
 app.post('/properties', function(req, res) {
     
@@ -132,7 +135,7 @@ app.post('/properties', function(req, res) {
 						s3bucket.putObject(d, function(err, res) {
 							userImageUploaded = true;
 							if (err) {
-								log.error("Error uploading data: ", err);
+								log.error("Error uploading Agent/Builder photo: ", err);
 							} else {
 								properties.property.urls.userUrl = amazonS3Url + userPhotoBucket + '/' + fileName;
 								log.info("saved user photo success");
@@ -169,7 +172,7 @@ app.post('/properties', function(req, res) {
 							s3bucket.putObject(d, function(err, res) {
 								
 								if (err) {
-									log.error("Error uploading data: ", err);
+									log.error("Error uploading property image: ", err);
 									properties.property.urls.propertyUrls[properties.property.urls.propertyUrls.length] = null;
 								} else {
 									imageUrl.url = amazonS3Url + propertyBucket + '/' + fileName;;
@@ -195,7 +198,7 @@ app.post('/properties', function(req, res) {
 		}
 		
 	 } catch(ex) {
-		log.error(ex);
+		log.error('Error in saving property'+ex);
 	 }
 	 
 	 
@@ -216,7 +219,7 @@ app.post('/properties', function(req, res) {
 				res.send({error:'Duplicate properties'});
 			   }
 			   else{
-				log.info(error);
+				log.error('Error in saving property in Mongo' + error);
 				res.send(error);
 			   }
 			}else{
@@ -230,9 +233,9 @@ app.post('/properties', function(req, res) {
 		if(properties.property.urls.userUrl) {
 			user.userUrl = properties.property.urls.userUrl;
 		}
-		fatProperties.addAgentBuilderDetails(user, function(error, user){
+		FatProfile.addProfile(user, function(error, user){
 			if(error){
-				log.error(error);
+				log.error('Error in saving profile in Mongo'+error);
 			}
 		 });
 	}
@@ -243,13 +246,11 @@ app.post('/properties', function(req, res) {
 
 
 
-
-
 app.get('/properties', function(req, res) {
  
     fatProperties.getAllList(function(error, properties){
 	    if(error){
-	    	log.error(error);
+	    	log.error('Error in getting properties' + error);
 			res.send("Something went wrong please try again");
 		}
 		else{
@@ -264,7 +265,7 @@ app.get('/properties/:id', function(req, res) {
  	var document_id = new require('mongodb').ObjectID(id);
     fatProperties.getProperty(document_id, function(error, property) {
 	    if(error){
-	    	log.error(error);
+	    	log.error('Error in getting property with id:'+id+' document_id'+document_id+' error:'+ error);
 			res.send("Something went wrong please try again");
 		}
 		else{
@@ -283,7 +284,7 @@ app.get('/properties/:city/:locality', function(req, res) {
 
     fatProperties.list(city, locality, function(error, properties){
 	    if(error){
-	    	log.error(error);
+	    	log.error('Error in getting properties for city:'+ city +' locality:'+locality+' error:'+error);
 			res.send("Something went wrong please try again");
 		}
 		else{
@@ -297,7 +298,7 @@ app.get('/cities', function(req, res) {
  
     fatCities.list(function(error, cities){
 	    if(error){
-	    	log.error(error);
+	    	log.error('Error in getting cities: '+error);
 			res.send("Something went wrong please try again");
 		}
 		else{
@@ -315,7 +316,7 @@ app.get('/localities/:city', function(req, res) {
    fatCities.getLocalities(city, function(error, localities){
 					
 		if(error){
-			log.error(error);
+			log.error('Error in getting localities for city:'+city+' error'+error);
 			res.send("Something went wrong please try again")
 		}
 		else{
@@ -340,7 +341,7 @@ app.post('/feedback', function(req, res) {
     var feedback = req.body;
 	fatFeedback.saveFeedback(feedback, function(error, feedback){
 	    if(error){
-		   log.error(error + 'could not save feedback' + feedback);
+		   log.error('could not save feedback:' + feedback+' error:'+error);
 		
 		}else{
 		   res.send(feedback);
@@ -368,6 +369,7 @@ function generateUUID() {
 var d = require('domain').create();
 d.on('error', function(er) {
   console.log('error', er.message);
+  log.error('Error' + er.message);
 });
 
 d.run(function() {
