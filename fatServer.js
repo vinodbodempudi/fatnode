@@ -186,7 +186,7 @@ app.post('/properties', function(req, res) {
 									log.info("Successfully uploaded image: count " + count);
 								}
 								
-								if(properties.property.urls.propertyUrls.length === properties.images.propertyImages.length-1) {
+								if(properties.property.urls.propertyUrls.length === properties.images.propertyImages.length) {
 									propertyImagesUploaded = true;
 									saveProperty(properties, userImageUploaded, propertyImagesUploaded);
 								}
