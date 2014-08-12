@@ -145,8 +145,8 @@ app.post('/properties', function(req, res) {
 					});
 				});
 		}
-		log.info("property images c0unt : " + properties.images.propertyImages.length);
-		if(properties.images.propertyImages) {
+		log.info("property images count : " + properties.images.propertyImages.length);
+		if(properties.images.propertyImages && properties.images.propertyImages.length > 0) {
 			propertyImagesUploaded = false;
 			var imageUrl, date = new Date();
 			var dateString = (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
