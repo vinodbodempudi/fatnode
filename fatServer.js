@@ -12,8 +12,8 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-//var FatUser = require('./fatUser').FatUser;
-//var fatUser= new FatUser('localhost', 27017);
+var FatUser = require('./fatUser').FatUser;
+var fatUser= new FatUser('localhost', 27017);
 
 var FatProfile = require('./fatProfile').FatProfile;
 var FatProfile= new FatProfile('localhost', 27017);
@@ -54,56 +54,56 @@ app.all('/*', function(req, res, next) {
     next();
 });
 
-// app.post('/users', function(req, res) {
-//     console.log("inside post method");
-//     var user = req.body;
-// 	console.log(user);
-//      fatUser.addUser(user, function(error, user){
-// 	    if(error){
-// 		   if(error.code==11000){
-// 		    log.error(error + 'Duplicate User');
-// 			res.send({error:'Duplicate User'});
-// 		   }
-// 		   else{
-// 		    res.send(error);
-// 		   }
-// 		}else{
-// 		   res.send(user);
-// 		}
-// 	 });
-// 	 });
+app.post('/users', function(req, res) {
+    console.log("inside post method");
+    var user = req.body;
+	console.log(user);
+     fatUser.addUser(user, function(error, user){
+	    if(error){
+		   if(error.code==11000){
+		    log.error(error + 'Duplicate User');
+			res.send({error:'Duplicate User'});
+		   }
+		   else{
+		    res.send(error);
+		   }
+		}else{
+		   res.send(user);
+		}
+	 });
+	 });
 	 
-// app.get('/users', function(req, res) {
-//  console.log("inside get all method");
+app.get('/users', function(req, res) {
+ console.log("inside get all method");
  
-//     fatUser.list(function(error, users){
-// 	    if(error){
-// 	    	log.error(error);
-// 			res.send(error);
-// 		}
-// 		else{
-// 			res.send(users);
-// 		}
-// 		});
+    fatUser.list(function(error, users){
+	    if(error){
+	    	log.error(error);
+			res.send(error);
+		}
+		else{
+			res.send(users);
+		}
+		});
 	
-// 	});
+	});
 
-// app.get('/users/:email', function(req, res) {
-//  console.log("inside get method");
+app.get('/users/:email', function(req, res) {
+ console.log("inside get method");
    
-//    var  email = req.params.email;
-//    console.log("email:"+email);
-//    fatUser.findByEmail(email, function(error, user){
+   var  email = req.params.email;
+   console.log("email:"+email);
+   fatUser.findByEmail(email, function(error, user){
 					
-// 		if(error){
-// 			log.error(error);
-// 			res.send(error)
-// 		}
-// 		else{
-// 			res.send(user);
-// 		}
-// 		});
-// 	});
+		if(error){
+			log.error(error);
+			res.send(error)
+		}
+		else{
+			res.send(user);
+		}
+		});
+	});
 
 app.post('/properties', function(req, res) {
     
