@@ -41,11 +41,11 @@ this.getCollection(function(error, users_collection){
 });
 };
 
-FatUser.prototype.findByEmail = function(email, callback){
+FatUser.prototype.authenticate = function(userDetails, callback){
 this.getCollection(function(error, users_collection){
   if(error) callback(error)
   else{
-    users_collection.find({'email':email}).nextObject( function(error, result){
+    users_collection.find({'email':userDetails.email, 'password':userDetails.password}).nextObject( function(error, result){
 	 if(error) callback(error)
 	 else{
 	 console.log(result);

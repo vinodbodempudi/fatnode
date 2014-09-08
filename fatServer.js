@@ -88,19 +88,25 @@ app.get('/users', function(req, res) {
 	
 	});
 
-app.get('/users/:email', function(req, res) {
+app.post('/users/authenticate', function(req, res) {
  console.log("inside get method");
    
-   var  email = req.params.email;
-   console.log("email:"+email);
-   fatUser.findByEmail(email, function(error, user){
+   var  userDetails = req.body;
+   console.log("email:"+userDetails.email);
+   fatUser.authenticate(userDetails, function(error, user){
 					
 		if(error){
 			log.error(error);
 			res.send(error)
 		}
 		else{
-			res.send(user);
+			if(user) {
+				delete user.password;
+				res.send(user);
+			} else {
+				res.send(401);
+			}
+		
 		}
 		});
 	});
