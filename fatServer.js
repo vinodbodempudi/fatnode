@@ -301,7 +301,7 @@ app.get('/properties/:city/:locality', function(req, res) {
 });
 
 app.get('/cities', function(req, res) {
- 
+	log.info('User-Agent: ' + req.headers['user-agent']);
     fatCities.list(function(error, cities){
 	    if(error){
 	    	log.error('Error in getting cities: '+error);
