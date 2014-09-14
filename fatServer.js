@@ -62,7 +62,7 @@ app.post('/users', function(req, res) {
 	    if(error){
 		   if(error.code==11000){
 		    log.error(error + 'Duplicate User');
-			res.send({error:'Duplicate User'});
+			res.send(409);
 		   }
 		   else{
 		    res.send(error);
