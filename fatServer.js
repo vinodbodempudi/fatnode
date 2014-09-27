@@ -265,6 +265,20 @@ app.get('/properties', function(req, res) {
 		});
 });
 
+app.get('/properties/my-properties/:userId', function(req, res) {
+	var userId = req.params.userId;
+    fatProperties.getMyProperties(userId, function(error, properties){
+	    if(error){
+	    	log.error('Error in getting mylist properties' + error);
+			res.send("Something went wrong please try again");
+		}
+		else{
+			console.log('properties' + properties);
+			res.send(properties);
+		}
+	});
+});
+
 app.get('/properties/:id', function(req, res) {
  
  	var id = req.params.id;

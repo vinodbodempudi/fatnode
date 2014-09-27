@@ -43,7 +43,7 @@ FatProperties.prototype.addProp = function(properties, callback) {
 this.getCollection(function(error, properties_collection){
  if(error) callback(error);
   else{
-    properties_collection.insert(properties.property, {safe:true}, function(error, properties){
+    properties_collection.save(properties.property,  {safe:true}, function(error, properties){
 	 try{
 	 	if(error) throw (error);
 	 	else{
@@ -88,6 +88,26 @@ this.getCollection(function(error, properties_collection){
      callback(null, results);
 	 }
 	});
+	}
+
+});
+};
+
+FatProperties.prototype.getMyProperties = function(userId, callback){
+this.getCollection(function(error, properties_collection){
+	if(error) {
+		callback(error);
+	} else {
+		properties_collection.find({"user._id":userId},
+			{"details.mode":1 , "details.price.price":1, "details.monthlyRent":1, "createdDate":1, "details.title":1, "location.lat":1, "location.lng":1
+			,"details.bedRooms":1, "details.bathRooms":1, "details.area.builtUp.builtUp":1, "details.area.builtUp.builtUpInSqft":1, "details.area.builtUp.units":1
+			,"details.area.perUnitPrice":1, "details.area.priceUnit":1, "user.locality":1, "details.propertySubType":1, "urls.coverPhotoUrl.url":1}).toArray(function(error, properties){
+			
+			 if(error) callback(error);
+			 else{
+				callback(null, properties);
+			 }
+		});
 	}
 
 });
