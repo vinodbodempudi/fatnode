@@ -2,7 +2,7 @@ var Db = require('mongodb').Db;
 var Connection = require('mongodb').connection;
 var Server = require('mongodb').Server;
 var BSON = require('mongodb').BSON;
-var ObjectID = require('mongodb').ObjectId;
+var ObjectID = require('mongodb').ObjectID;
 
 var fs = require('fs');
 var AWS = require('aws-sdk'); 
@@ -43,7 +43,7 @@ FatProperties.prototype.addProp = function(properties, callback) {
 this.getCollection(function(error, properties_collection){
  if(error) callback(error);
   else{
-    properties_collection.save(properties.property,  {safe:true}, function(error, properties){
+    properties_collection.insert(properties.property,  {safe:true}, function(error, properties){
 	 try{
 	 	if(error) throw (error);
 	 	else{
@@ -56,6 +56,34 @@ this.getCollection(function(error, properties_collection){
 }
 
 });
+};
+
+FatProperties.prototype.updateProperty = function(property, callback) {
+	this.getCollection(function(error, properties_collection){
+		 if(error) {
+			callback(error);
+		 } else {
+		 
+			properties_collection.remove({_id: ObjectID(property._id)}, function(err, result) {
+					delete property._id;
+					properties_collection.insert(property, { safe:true}, function(error, properties){
+					 try{
+						if(error) {
+							logger.error("updating error : " + error);
+							throw (error);
+						}
+						
+						else{
+							logger.info("updating success : " + properties);
+							callback(null, properties);
+						}
+					 } catch (ex) {
+						callback(ex);
+					}
+				});
+			});
+		}
+	});
 };
 
 FatProperties.prototype.addAgentBuilderDetails = function(user, callback) {
@@ -93,12 +121,12 @@ this.getCollection(function(error, properties_collection){
 });
 };
 
-FatProperties.prototype.getMyProperties = function(userId, callback){
+FatProperties.prototype.getMyProperties = function(userId, email, callback){
 this.getCollection(function(error, properties_collection){
 	if(error) {
 		callback(error);
 	} else {
-		properties_collection.find({"user._id":userId},
+		properties_collection.find({$or:[{"user._id":userId}, {"user.email":email}, {"user.primaryEmail":email}]},
 			{"details.mode":1 , "details.price.price":1, "details.monthlyRent":1, "createdDate":1, "details.title":1, "location.lat":1, "location.lng":1
 			,"details.bedRooms":1, "details.bathRooms":1, "details.area.builtUp.builtUp":1, "details.area.builtUp.builtUpInSqft":1, "details.area.builtUp.units":1
 			,"details.area.perUnitPrice":1, "details.area.priceUnit":1, "user.locality":1, "details.propertySubType":1, "urls.coverPhotoUrl.url":1}).toArray(function(error, properties){
