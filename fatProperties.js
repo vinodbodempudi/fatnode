@@ -39,11 +39,16 @@ this.db.collection('properties', function(error, agentBuilder_collection){
 	});
 };
 
-FatProperties.prototype.addProp = function(properties, callback) {
+FatProperties.prototype.addProp = function(property, callback) {
 this.getCollection(function(error, properties_collection){
  if(error) callback(error);
   else{
-    properties_collection.insert(properties.property,  {safe:true}, function(error, properties){
+  
+	if(property._id) {
+		property._id = ObjectID(property._id);
+	}
+	
+    properties_collection.save(property,  {safe:true}, function(error, properties){
 	 try{
 	 	if(error) throw (error);
 	 	else{
@@ -56,34 +61,6 @@ this.getCollection(function(error, properties_collection){
 }
 
 });
-};
-
-FatProperties.prototype.updateProperty = function(property, callback) {
-	this.getCollection(function(error, properties_collection){
-		 if(error) {
-			callback(error);
-		 } else {
-		 
-			properties_collection.remove({_id: ObjectID(property._id)}, function(err, result) {
-					delete property._id;
-					properties_collection.insert(property, { safe:true}, function(error, properties){
-					 try{
-						if(error) {
-							logger.error("updating error : " + error);
-							throw (error);
-						}
-						
-						else{
-							logger.info("updating success : " + properties);
-							callback(null, properties);
-						}
-					 } catch (ex) {
-						callback(ex);
-					}
-				});
-			});
-		}
-	});
 };
 
 FatProperties.prototype.addAgentBuilderDetails = function(user, callback) {

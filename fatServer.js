@@ -111,7 +111,7 @@ app.post('/users/authenticate', function(req, res) {
 		});
 	});
 
-app.post('/properties', function(req, res) {
+app.post('/properties/register-property', function(req, res) {
     
     var properties = req.body;
 	log.info(properties);
@@ -215,7 +215,7 @@ app.post('/properties', function(req, res) {
 		}
 
 		log.info("saving property");
-		fatProperties.addProp(properties, function(error, properties){
+		fatProperties.addProp(properties.property, function(error, properties){
 			if(error){
 			   if(error.code==11000){
 				log.error(error + ' Duplicate properties');
@@ -226,131 +226,12 @@ app.post('/properties', function(req, res) {
 				res.send(error);
 			   }
 			}else{
-			   res.send(properties);
+			   res.send(200);
 			}
 		 });
 	}
 
 	saveProperty(properties, userImageUploaded, propertyImagesUploaded);
-	
-});
-
-app.post('/properties/updateProperty', function(req, res) {
-    
-    var properties = req.body;
-	log.info(properties);
-	var count = 0, amazonS3Url='http://s3.amazonaws.com/', userImageUploaded = true, propertyImagesUploaded = true;
-    try{
-		properties.property.urls = {};
-		var uuid = generateUUID()
-		if(properties.images.userImage) {
-				userImageUploaded = false;
-				var buffer =  new Buffer(properties.images.userImage.data, 'base64');
-				var s3bucket = new AWS.S3();
-				var userPhotoBucket;
-				if(properties.property.user.type === 'Agent' ) {
-					userPhotoBucket = 'fathome-images/agent/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
-				} else {
-					userPhotoBucket = 'fathome-images/builder/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
-				}
-				var fileName = properties.property.user.name + "." + properties.images.userImage.ext;
-				s3bucket.createBucket(function() {
-					var d = {
-							Bucket: userPhotoBucket,
-							//'Content-Type' : 'image/png',
-							Key: fileName,	
-							Body: buffer,
-							ACL: 'public-read'
-						};				
-						s3bucket.putObject(d, function(err, res) {
-							userImageUploaded = true;
-							if (err) {
-								log.error("Error uploading Agent/Builder photo: ", err);
-							} else {
-								properties.property.urls.userUrl = amazonS3Url + userPhotoBucket + '/' + fileName;
-								log.info("saved user photo success");
-							}
-							
-							updateProperty(properties, userImageUploaded, propertyImagesUploaded);
-					});
-				});
-		}
-		log.info("property images count : " + properties.images.propertyImages.length);
-		if(properties.images.propertyImages && properties.images.propertyImages.length > 0) {
-			propertyImagesUploaded = false;
-			var imageUrl, date = new Date();
-			var dateString = (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
-			var propertyBucket = 'fathome-images/' + dateString + '/' + properties.property.user.city +'/'+properties.property.user.locality+'/'+uuid;
-			properties.property.urls.propertyUrls = [];
-			for(var i=0; i<properties.images.propertyImages.length; i++) {
-				
-				var currentImage =properties.images.propertyImages[i]; 
-				(function uploadToAmazonS3(currentImage, count) {
-					
-						var imageUrl = {};
-						var buffer =  new Buffer(currentImage.data, 'base64');
-						var s3bucket = new AWS.S3();
-						var fileName = count+"."+currentImage.ext;
-						
-						s3bucket.createBucket(function() {
-						var d = {
-							Bucket: propertyBucket,
-							Key: fileName,	
-							Body: buffer,
-							ACL: 'public-read'
-							};				
-							s3bucket.putObject(d, function(err, res) {
-								
-								if (err) {
-									log.error("Error uploading property image: ", err);
-									properties.property.urls.propertyUrls[properties.property.urls.propertyUrls.length] = null;
-								} else {
-									imageUrl.url = amazonS3Url + propertyBucket + '/' + fileName;;
-									if(currentImage.coverPhoto) {
-										imageUrl.coverPhoto = currentImage.coverPhoto;
-										properties.property.urls.coverPhotoUrl=imageUrl
-									}
-									properties.property.urls.propertyUrls[properties.property.urls.propertyUrls.length] = imageUrl;
-									log.info("imageurl " + imageUrl.url);
-									log.info("array count " + properties.property.urls.propertyUrls.length);
-									log.info("Successfully uploaded image: count " + count);
-								}
-								
-								if(properties.property.urls.propertyUrls.length === properties.images.propertyImages.length) {
-									propertyImagesUploaded = true;
-									updateProperty(properties, userImageUploaded, propertyImagesUploaded);
-								}
-								
-							});
-					});	
-				}(currentImage, i))
-			}
-		}
-		
-	 } catch(ex) {
-		log.error('Error in saving property'+ex);
-	 }
-	 
-	 
-	 var updateProperty = function (properties, userImageUploaded, propertyImagesUploaded) {
-		
-		if(!propertyImagesUploaded || !userImageUploaded) {
-			return;
-		}
-
-		log.info("updating property");
-		fatProperties.updateProperty(properties.property, function(error, properties){
-			if(error){
-				log.error('Error in updating property in Mongo' + error);
-				res.send(error);
-			} else {
-				log.info("property update successfull.");
-			   res.send(properties);
-			}
-		 });
-	}
-
-	updateProperty(properties, userImageUploaded, propertyImagesUploaded);
 	
 });
 
