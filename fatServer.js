@@ -306,6 +306,36 @@ app.get('/properties', function(req, res) {
 		});
 });
 
+app.get('/send-sms', function(req, res) {
+ 
+    
+	var optionsget = {
+		host : 'api.smscountry.com',
+		port : 80,
+		path : '/SMSCwebservice_bulk.aspx?User=fathome_hyd&passwd=bulksms&mobilenumber=919989511450&message=testingsmscountry&sid=fathome_hyd&mtype=N',
+		method : 'GET'
+	};
+	
+	var reqGet = http.request(optionsget, function(httpres) {
+		console.log("statusCode: ", httpres.statusCode);
+		
+		httpres.on('data', function(d) {
+			console.info('GET result:\n');
+			console.info('\n\nCall completed');
+			console.info('d : ' + d);
+			res.send(200, d);
+		});
+	 
+	});
+	 
+	reqGet.end();
+	reqGet.on('error', function(e) {
+		console.error(e);
+		res.send(e);
+	});
+ 
+});
+
 app.get('/properties/my-properties/:userId/:email', function(req, res) {
 	var userId = req.params.userId, email = req.params.email;
     fatProperties.getMyProperties(userId, email, function(error, properties){
