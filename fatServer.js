@@ -115,7 +115,7 @@ app.post('/properties/register-property', function(req, res) {
     
     var properties = req.body;
 	log.info(properties);
-	var amazonS3Url='http://s3.amazonaws.com/', userImageUploaded = true, propertyImagesUploaded = true;
+	var amazonS3Url='http://s3.amazonaws.com/', userImageUploaded = true, propertyImagesUploaded = true, uuid = generateUUID();
     try{
 		if(properties.isEditProperty) {
 			updateProperty(properties);
@@ -230,7 +230,7 @@ app.post('/properties/register-property', function(req, res) {
 		
 		if(propertyImages && propertyImages.length > 0) {
 			propertyImagesUploaded = false;
-			var imageUrl, date = new Date(), propertyImageUrls = [], coverPhoto, uuid = generateUUID();
+			var imageUrl, date = new Date(), propertyImageUrls = [], coverPhoto;
 			var dateString = (date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
 			var propertyBucket = 'fathome-images/' + dateString + '/' + userDetails.city +'/'+userDetails.locality+'/'+uuid;
 			for(var i=0; i<propertyImages.length; i++) {
