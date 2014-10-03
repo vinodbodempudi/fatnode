@@ -293,6 +293,26 @@ app.post('/properties/register-property', function(req, res) {
 	
 });
 
+app.post('/properties/update-property', function(req, res) {
+    
+    var request = req.body;
+	log.info("update property request : "+request);
+	try{
+		fatProperties.updateProperty(request, function(error){
+			if(error){
+				log.error('Error in saving property in Mongo' + error);
+				res.send(error);
+			}else{
+			   res.send(200);
+			}
+		 });
+	 } catch(ex) {
+		log.error('Error in saving property'+ex);
+		res.send(ex);
+	 }
+	
+});
+
 app.get('/properties', function(req, res) {
  
     fatProperties.getAllList(function(error, properties){
