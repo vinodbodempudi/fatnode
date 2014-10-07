@@ -130,6 +130,11 @@ app.post('/properties/register-property', function(req, res) {
 	 function insertProperty(properties, callback) {
 		savePropertyUserImage(properties.property.user, properties.images.userImage, function(imageLocation) {
 			userImageUploaded = true;
+			
+			if(!properties.property.urls) {
+				properties.property.urls = {};
+			}
+			
 			if (imageLocation) {
 				properties.property.urls.userUrl = imageLocation;
 			}
@@ -138,7 +143,11 @@ app.post('/properties/register-property', function(req, res) {
 		
 		savePropertyImages(properties.images.propertyImages, properties.property.user, function(propertyImageUrls, coverPhoto) {
 			propertyImagesUploaded = true;
-			properties.property.urls = {};
+			
+			if(!properties.property.urls) {
+				properties.property.urls = {};
+			}
+			
 			properties.property.urls.propertyUrls = propertyImageUrls;
 
 			if (coverPhoto) {
@@ -155,6 +164,11 @@ app.post('/properties/register-property', function(req, res) {
 		
 		savePropertyUserImage(properties.property.user, properties.images.userImage, function(imageLocation) {
 			userImageUploaded = true;
+			
+			if(!properties.property.urls) {
+				properties.property.urls = {};
+			}
+			
 			if (imageLocation) {
 				properties.property.urls.userUrl = imageLocation;
 			}
