@@ -340,34 +340,74 @@ app.get('/properties', function(req, res) {
 		});
 });
 
-app.get('/send-sms', function(req, res) {
+
+
+var smsConfig = {sendSmsToFatHomeSupport:true, fatHomeSupportNumber:"7396355472"};
+app.post('/send-sms', function(req, res) {
  
-    
+    var request = req.body;
+	log.info(request);
+	var toPhoneNumber, path, completedRequests=0;
+	
 	var optionsget = {
 		host : 'api.smscountry.com',
 		port : 80,
-		path : '/SMSCwebservice_bulk.aspx?User=fathome_hyd&passwd=bulksms&mobilenumber=919989511450&message=testingsmscountry&sid=fathome_hyd&mtype=N',
 		method : 'GET'
 	};
-	
-	var reqGet = http.request(optionsget, function(httpres) {
-		console.log("statusCode: ", httpres.statusCode);
+	var sendSms = function(phoneNumber, message, isResponseAckRequired) {
+		var optionsget = {
+			host : 'api.smscountry.com',
+			port : 80,
+			path : '/SMSCwebservice_bulk.aspx?User=fathome_hyd&passwd=bulksms&mobilenumber='
+					+phoneNumber+'&message='+message+'&sid=fathome_hyd&mtype=N',
+			method : 'GET'
+		};
 		
-		httpres.on('data', function(d) {
-			console.info('GET result:\n');
-			console.info('\n\nCall completed');
-			console.info('d : ' + d);
-			res.send(200, d);
+		var reqGet = http.request(optionsget, function(httpres) {
+			httpres.on('data', function(d) {
+				log.info(d);
+				completedRequests++;
+				if(isResponseAckRequired) {
+					sendResponse(200, d);
+				}
+					
+			});
+		 
 		});
-	 
-	});
-	 
-	reqGet.end();
-	reqGet.on('error', function(e) {
-		console.error(e);
-		res.send(e);
-	});
- 
+		 
+		reqGet.end();
+		reqGet.on('error', function(e) {
+			log.error(e);
+			completedRequests++;
+			if(isResponseAckRequired) {
+				sendResponse(500, e);
+			}
+			
+		});
+	}
+	
+	var sendResponse = function(status, data) {
+		if(completedRequests == request.toPhoneNumbers.length) {
+			sendSMSToFatHomeSupport(request);
+			res.send(status, data);
+		}
+		res.send(status, data);
+	}
+	
+	var sendSMSToFatHomeSupport = function(request) {
+		log.info('sendSMSToFatHomeSupport');
+		if(smsConfig.sendSmsToFatHomeSupport) {
+			var message =  'From:'+request.phoneNumber
+						  +',To:'+request.toPhoneNumbers
+						  +',property:'+request.propertyUrl;
+			sendSms(smsConfig.fatHomeSupportNumber, message, false);
+		}
+	}
+	
+	sendSMSToFatHomeSupport(request);
+	for(var i=0; i<request.toPhoneNumbers.length; i++) {
+		sendSms(request.toPhoneNumbers[i], request.message, true);
+	}
 });
 
 app.get('/properties/my-properties/:userId/:email', function(req, res) {
