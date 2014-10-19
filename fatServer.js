@@ -14,7 +14,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var FatUser = require('./fatUser').FatUser;
 var fatUser= new FatUser('localhost', 27017);
-
+var appConfig = require('./appConfig.json')
 var FatProfile = require('./fatProfile').FatProfile;
 var FatProfile= new FatProfile('localhost', 27017);
 
@@ -340,9 +340,6 @@ app.get('/properties', function(req, res) {
 		});
 });
 
-
-
-var smsConfig = {sendSmsToFatHomeSupport:true, fatHomeSupportNumber:"7396355472"};
 app.post('/send-sms', function(req, res) {
  
     var request = req.body;
@@ -397,6 +394,8 @@ app.post('/send-sms', function(req, res) {
 	
 	var sendSMSToFatHomeSupport = function(request) {
 		log.info('sendSMSToFatHomeSupport');
+		
+		var smsConfig = appConfig.smsConfig;
 		if(smsConfig.sendSmsToFatHomeSupport) {
 			var message =  'From:'+request.phoneNumber
 						  +',To:'+request.toPhoneNumbers

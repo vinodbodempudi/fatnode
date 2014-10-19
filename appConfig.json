@@ -1,0 +1,6 @@
+{ 
+	"smsConfig":{
+		"sendSmsToFatHomeSupport":true,
+		"fatHomeSupportNumber":"9989511450"
+	}
+ }
