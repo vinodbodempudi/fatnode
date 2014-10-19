@@ -34,7 +34,7 @@ AWS.config.loadFromPath('./config.json');
 var log4js = require( "log4js" );
 log4js.configure( "log4js.json" );
 var log = log4js.getLogger( "test-file-appender" );
-
+var qs = require('querystring');
 // view engine setup
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
@@ -364,8 +364,9 @@ app.post('/send-sms', function(req, res) {
 		};
 		
 		var reqGet = http.request(optionsget, function(httpres) {
+			httpres.setEncoding('utf8');
 			httpres.on('data', function(d) {
-				log.info(d);
+				log.info("phoneNumber:"+phoneNumber+", message:"+message+",status:"+d);
 				completedRequests++;
 				if(isResponseAckRequired) {
 					sendResponse(200, d);
@@ -377,10 +378,10 @@ app.post('/send-sms', function(req, res) {
 		 
 		reqGet.end();
 		reqGet.on('error', function(e) {
-			log.error(e);
+			log.error("phoneNumber:"+phoneNumber+", message:"+message+",status:"+e);
 			completedRequests++;
 			if(isResponseAckRequired) {
-				sendResponse(500, e);
+				sendResponse(200, e);
 			}
 			
 		});
@@ -399,14 +400,14 @@ app.post('/send-sms', function(req, res) {
 		if(smsConfig.sendSmsToFatHomeSupport) {
 			var message =  'From:'+request.phoneNumber
 						  +',To:'+request.toPhoneNumbers
-						  +',property:'+request.propertyUrl;
+						  +',propURL:'+qs.escape(request.propertyUrl);
 			sendSms(smsConfig.fatHomeSupportNumber, message, false);
 		}
 	}
 	
-	sendSMSToFatHomeSupport(request);
 	for(var i=0; i<request.toPhoneNumbers.length; i++) {
-		sendSms(request.toPhoneNumbers[i], request.message, true);
+		var message = "fathome.in inquiry on "+request.propertyUrl+" please call on "+request.phoneNumber;
+		sendSms(request.toPhoneNumbers[i], qs.escape(message), true);
 	}
 });
 
