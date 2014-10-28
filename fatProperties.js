@@ -140,7 +140,7 @@ FatProperties.prototype.getProperty = function(id, callback){
 this.getCollection(function(error, properties_collection){
  if(error) callback(error);
   else{
-     properties_collection.findOne({'_id': id}, function(error, result){
+     properties_collection.findOne({'_id': ObjectID(id)}, function(error, result){
 	 if(error) callback(error);
 	 else{
      	callback(null, result);

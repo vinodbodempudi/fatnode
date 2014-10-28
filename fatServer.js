@@ -425,19 +425,19 @@ app.get('/properties/my-properties/:userId/:email', function(req, res) {
 });
 
 app.get('/properties/:id', function(req, res) {
- 
- 	var id = req.params.id;
- 	var document_id = new require('mongodb').ObjectID(id);
-    fatProperties.getProperty(document_id, function(error, property) {
-	    if(error){
-	    	log.error('Error in getting property with id:'+id+' document_id'+document_id+' error:'+ error);
+	var id = req.params.id;
+	log.info("get property details: Service URL : " + req.protocol + '://' + req.get('host') + req.originalUrl);
+
+    fatProperties.getProperty(id, function(error, property) {
+	    if(error) {
+	    	log.error('Error in getting property with id:'+id+' error:'+ error);
 			res.send("Something went wrong please try again");
-		}
-		else{
-			//log.info(property);
+		} else {
+			var uiUrl = "http://fathome.in/#/properties/"+property.user.city+"/"+property.user.locality+"/"+id;
+			log.info("get property details: UI URL : " + uiUrl);
 			res.send(property);
 		}
-		});
+	});
 });
 
 app.get('/properties/:city/:locality', function(req, res) {
