@@ -426,7 +426,7 @@ app.get('/properties/my-properties/:userId/:email', function(req, res) {
 
 app.get('/properties/:id', function(req, res) {
 	var id = req.params.id;
-	log.info("get property details: Service URL : " + req.protocol + '://' + req.get('host') + req.originalUrl);
+	//log.info("get property details: Service URL : " + req.protocol + '://' + req.get('host') + req.originalUrl);
 
     fatProperties.getProperty(id, function(error, property) {
 	    if(error) {
