@@ -433,8 +433,11 @@ app.get('/properties/:id', function(req, res) {
 	    	log.error('Error in getting property with id:'+id+' error:'+ error);
 			res.send("Something went wrong please try again");
 		} else {
-			var uiUrl = "http://fathome.in/#/properties/"+property.user.city+"/"+property.user.locality+"/"+id;
-			log.info("get property details: UI URL : " + uiUrl);
+			if(property) {
+				var uiUrl = "http://fathome.in/#/properties/"+property.user.city+"/"+property.user.locality+"/"+id;
+				log.info("get property details: UI URL : " + uiUrl);
+			}
+
 			res.send(property);
 		}
 	});
