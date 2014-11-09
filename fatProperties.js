@@ -124,7 +124,7 @@ this.getCollection(function(error, properties_collection){
 		properties_collection.find({'active': { $ne: 'D'}, $or:[{"user._id":userId}, {"user.email":email}, {"user.primaryEmail":email}]},
 			{"active":1, "details.mode":1 , "details.price.price":1, "details.monthlyRent":1, "createdDate":1, "lastUpdatedDate":1, "details.title":1, "location.lat":1, "location.lng":1
 			,"details.bedRooms":1, "details.bathRooms":1, "details.area.builtUp.builtUp":1, "details.area.builtUp.builtUpInSqft":1, "details.area.plotOrLand.plotOrLand":1, 
-			"details.area.plotOrLand.units":1 ,"details.area.perUnitPrice":1, "details.area.priceUnit":1, "details.area.perUnitUnits":1, "user.locality":1, "details.propertySubType":1, "urls.coverPhotoUrl.url":1}).toArray(function(error, properties){
+			"details.area.plotOrLand.units":1 ,"details.area.plotOrLand.plotOrLandInSqft":1, "details.area.perUnitPrice":1, "details.area.priceUnit":1, "details.area.perUnitUnits":1, "user.locality":1, "details.propertySubType":1, "urls.coverPhotoUrl.url":1}).toArray(function(error, properties){
 			
 			 if(error) callback(error);
 			 else{
@@ -158,7 +158,7 @@ this.getCollection(function(error, properties_collection){
     properties_collection.find({"user.city":city, "user.locality":locality, 'active': { $ne: 'D'}},
     	{"active":1, "details.mode":1 , "details.price.price":1, "details.monthlyRent":1, "createdDate":1, "lastUpdatedDate":1, "details.title":1, "location.lat":1, "location.lng":1
     	,"details.bedRooms":1, "details.bathRooms":1, "details.area.builtUp.builtUp":1, "details.area.builtUp.builtUpInSqft":1, "details.area.builtUp.units":1,
-    	"details.area.plotOrLand.plotOrLand":1, "details.area.plotOrLand.units":1 ,"details.area.perUnitPrice":1,"details.area.perUnitUnits":1, "details.area.priceUnit":1, "user.locality":1, "details.propertySubType":1, "urls.coverPhotoUrl.url":1}).toArray(function(error, properties){
+    	"details.area.plotOrLand.plotOrLand":1, "details.area.plotOrLand.units":1 ,"details.area.plotOrLand.plotOrLandInSqft":1,"details.area.perUnitPrice":1,"details.area.perUnitUnits":1, "details.area.priceUnit":1, "user.locality":1, "details.propertySubType":1, "urls.coverPhotoUrl.url":1}).toArray(function(error, properties){
 		 if(error) callback(error);
 		 else{
 		 	callback(null, properties);
