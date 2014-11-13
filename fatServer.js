@@ -410,6 +410,45 @@ app.post('/send-sms', function(req, res) {
 	}
 });
 
+app.get('/send-email', function(req, res) {
+	log.info('send-email');
+	// load AWS SES
+	var ses = new AWS.SES({apiVersion: '2010-12-01'});
+
+	// send to list
+	var to = ['rama.guntu@gmail.com']
+
+	// this must relate to a verified SES account
+	var from = 'vinodbodempudi@gmail.com'
+
+
+	// this sends the email
+	// @todo - add HTML version
+	ses.sendEmail( { 
+	   Source: from, 
+	   Destination: { ToAddresses: to },
+	   Message: {
+		   Subject: {
+			  Data: 'A Message To You Rudy'
+		   },
+		   Body: {
+			   Text: {
+				   Data: 'Stop your messing around',
+			   }
+			}
+	   }
+	}
+	, function(err, data) {
+		if(err) throw err
+			log.info('Email sent:');
+			log.info(data);
+		res.send(200, data);
+	 });
+ 
+    
+});
+
+
 app.get('/properties/my-properties/:userId/:email', function(req, res) {
 	var userId = req.params.userId, email = req.params.email;
     fatProperties.getMyProperties(userId, email, function(error, properties){
