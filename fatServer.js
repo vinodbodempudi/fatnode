@@ -478,8 +478,28 @@ app.get('/properties/:id', function(req, res) {
 			}
 
 			res.send(property);
+			increaseViewsCount(id, property);
 		}
 	});
+	
+	function increaseViewsCount(id, property) {
+		try {
+			var totalViews = Number(property.totalViews || 0) + 1;
+			var request = {_id:id, update:{totalViews:totalViews}}
+			fatProperties.updateProperty(request, function(error){
+				if(error){
+					log.error('Error while increaing views count for property: '+id);
+					log.error('Error details: '+ex);
+				}else{
+				   
+				}
+			 });
+		} catch(ex) {
+			log.error('Error while increaing views count for property: '+id);
+			log.error('Error details: '+ex);
+		}
+	
+	}
 });
 
 app.get('/properties/:city/:locality', function(req, res) {
