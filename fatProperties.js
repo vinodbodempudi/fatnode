@@ -136,6 +136,44 @@ this.getCollection(function(error, properties_collection){
 });
 };
 
+FatProperties.prototype.getPropertiesCount = function(city, callback){
+    this.getCollection(function(error, properties_collection){
+            if(error) {
+                 callback(error);
+            }
+            else{
+			
+				properties_collection.find({"user.city":city, "active": { $ne: 'D'}}).toArray(function (e, properties) {
+				  var property, totalRentProps=0, totalPlotOrLandProps=0, totalSellProps=0;
+				  console.log("properties.length : " + properties.length)
+				  for(var i=0; i < properties.length; i++) {
+					property = properties[i];
+					
+					if(property.details.mode === 'Rent') {
+						++totalRentProps;
+						continue;
+					}
+					
+					if(property.details.propertySubType === 'Land/Plot') {
+						++totalPlotOrLandProps;
+						continue;
+					}
+					
+					if(property.details.mode === 'Sell') {
+						++totalSellProps;
+					}
+				  
+				  }
+				  
+				  callback(null, {totalRentProps:totalRentProps*2, totalPlotOrLandProps:totalPlotOrLandProps*2, totalSellProps:totalSellProps*2});
+				});
+
+                
+                
+            }
+    });
+};
+
 FatProperties.prototype.getProperty = function(id, callback){
 	this.getCollection(function(error, properties_collection){
 	 if(error) callback(error);

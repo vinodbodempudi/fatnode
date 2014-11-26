@@ -462,7 +462,25 @@ app.get('/properties/my-properties/:userId/:email', function(req, res) {
 		}
 	});
 });
-
+app.get('/properties/properties-counts/:city', function(req, res) {
+    try {
+        fatProperties.getPropertiesCount(req.params.city, function(error, propertiesCounts){
+            if(error){
+                log.error('Error in getting properties counts');
+				log.error(error);
+                res.send(500, "Something went wrong please try again");
+            }
+            else{
+                console.log('Properties byy count' + propertiesCounts);
+                res.send(propertiesCounts);
+            }
+        });
+    } catch(error) {
+		log.error('Error in getting properties counts');
+		log.error(error);
+        res.send(500, "Something went wrong please try again");
+    }
+});
 app.get('/properties/:id', function(req, res) {
 	var id = req.params.id;
 	//log.info("get property details: Service URL : " + req.protocol + '://' + req.get('host') + req.originalUrl);
