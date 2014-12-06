@@ -451,6 +451,7 @@ app.get('/send-email', function(req, res) {
 app.post('/user-details', function(req, res) {
 	log.info("user-details");
 	log.info(req.body);
+	res.send(200);
 });
 
 app.get('/properties/my-properties/:userId/:email', function(req, res) {
