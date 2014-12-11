@@ -449,8 +449,24 @@ app.get('/send-email', function(req, res) {
 });
 
 app.post('/user-details', function(req, res) {
+
+	var request = req.body;
+	var avoidLogForNumbers = appConfig.logConfig.avoidPropertyLogFor;
+	var isLogRequired = true;
+	for(var i=0; i<avoidLogForNumbers.length; i++) {
+		if(avoidLogForNumbers[i].indexOf(request.lead) > -1) {
+			isLogRequired = false;
+			break;
+		}
+	}
+	
+	if(!isLogRequired) {
+		res.send(200);
+		return;
+	}
+	
 	log.info("user-details");
-	log.info(req.body);
+	log.info(request);
 	res.send(200);
 });
 
