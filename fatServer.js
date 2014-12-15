@@ -310,6 +310,13 @@ app.post('/properties/register-property', function(req, res) {
 app.post('/properties/update-property', function(req, res) {
     
     var request = req.body;
+	log.info("update property request : ");
+	log.info(request);
+	
+	if(request.url) {
+		log.info("Delete property url  : "+request.url);
+	}
+	
 	log.info("update property request : "+request);
 	try{
 		fatProperties.updateProperty(request, function(error){
