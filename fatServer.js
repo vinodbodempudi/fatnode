@@ -58,6 +58,12 @@ app.post('/users', function(req, res) {
     //log.info("inside post method");
     var user = req.body;
 	log.info(user);
+	
+	
+	var verficationCode=Math.floor(Math.random()*1111111);
+	user.verified = false;
+	user.verficationCode = verficationCode;
+	
      fatUser.addUser(user, function(error, user){
 	    if(error){
 		   if(error.code==11000){
@@ -68,10 +74,28 @@ app.post('/users', function(req, res) {
 		    res.send(error);
 		   }
 		}else{
-		   res.send(user);
+			
+			var createdUser = user[0];
+		
+			delete createdUser.verficationCode;
+		   res.send(createdUser);
+		   sendOTP(createdUser.phoneNumber, verficationCode);
 		}
 	 });
-	 });
+});
+
+function sendOTP(phoneNo, verficationCode) {
+	log.info('sendOTP Phone No: ' + phoneNo);
+	var message = verficationCode+' is the Onetime password(OTP) to activate your account in fathome.in. PLS DO NOT SHARE WITH ANYONE'
+	var callback = function(data) {
+	
+	
+	
+	}
+
+	sendSms(phoneNo, message, callback);
+
+}
 	 
 app.get('/users', function(req, res) {
  //console.log("inside get all method");
@@ -344,26 +368,16 @@ app.get('/properties', function(req, res) {
 		else{
 			res.send(properties);
 		}
-		});
+	});
 });
 
-app.post('/send-sms', function(req, res) {
+ function sendSms(phoneNumber, message, responseCallback) {
  
-    var request = req.body;
-	log.info(request);
-	var toPhoneNumber, path, completedRequests=0;
-	
-	var optionsget = {
-		host : 'api.smscountry.com',
-		port : 80,
-		method : 'GET'
-	};
-	var sendSms = function(phoneNumber, message, isResponseAckRequired) {
 		var optionsget = {
 			host : 'api.smscountry.com',
 			port : 80,
 			path : '/SMSCwebservice_bulk.aspx?User=fathome_hyd&passwd=bulksms&mobilenumber='
-					+phoneNumber+'&message='+message+'&sid=fathome_hyd&mtype=N',
+					+phoneNumber+'&message='+qs.escape(message)+'&sid=fathome_hyd&mtype=N',
 			method : 'GET'
 		};
 		
@@ -371,32 +385,34 @@ app.post('/send-sms', function(req, res) {
 			httpres.setEncoding('utf8');
 			httpres.on('data', function(d) {
 				log.info("phoneNumber:"+phoneNumber+", message:"+message+",status:"+d);
-				completedRequests++;
-				if(isResponseAckRequired) {
-					sendResponse(200, d);
+				if(responseCallback) {
+					responseCallback(d);
 				}
-					
 			});
-		 
 		});
 		 
 		reqGet.end();
 		reqGet.on('error', function(e) {
 			log.error("phoneNumber:"+phoneNumber+", message:"+message+",status:"+e);
-			completedRequests++;
-			if(isResponseAckRequired) {
-				sendResponse(200, e);
+			if(responseCallback) {
+				responseCallback(d);
 			}
-			
 		});
 	}
+
+app.post('/send-sms', function(req, res) {
+ 
+    var request = req.body;
+	log.info(request);
+	var toPhoneNumber, path, completedRequests=0;
 	
-	var sendResponse = function(status, data) {
+	var sendResponse = function(data) {
+		completedRequests++;
 		if(completedRequests == request.toPhoneNumbers.length) {
 			sendSMSToFatHomeSupport(request);
-			res.send(status, data);
+			res.send(200, data);
 		}
-		res.send(status, data);
+		res.send(200, data);
 	}
 	
 	var sendSMSToFatHomeSupport = function(request) {
@@ -406,14 +422,14 @@ app.post('/send-sms', function(req, res) {
 		if(smsConfig.sendSmsToFatHomeSupport) {
 			var message =  'From:'+request.phoneNumber
 						  +',To:'+request.toPhoneNumbers
-						  +',propURL:'+qs.escape(request.propertyUrl);
-			sendSms(smsConfig.fatHomeSupportNumber, message, false);
+						  +',propURL:'+request.propertyUrl;
+			sendSms(smsConfig.fatHomeSupportNumber, message);
 		}
 	}
 	
 	for(var i=0; i<request.toPhoneNumbers.length; i++) {
 		var message = "fathome.in inquiry on "+request.propertyUrl+" please call on "+request.phoneNumber;
-		sendSms(request.toPhoneNumbers[i], qs.escape(message), true);
+		sendSms(request.toPhoneNumbers[i], message, sendResponse);
 	}
 });
 
