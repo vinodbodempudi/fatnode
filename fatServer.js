@@ -60,9 +60,9 @@ app.post('/users', function(req, res) {
 	log.info(user);
 	
 	
-	var verficationCode=Math.floor(Math.random()*1111111);
+	var verificationCode=Math.floor(Math.random()*900000) + 100000;
 	user.verified = false;
-	user.verficationCode = verficationCode;
+	user.verificationCode = verificationCode;
 	
      fatUser.addUser(user, function(error, user){
 	    if(error){
@@ -76,25 +76,23 @@ app.post('/users', function(req, res) {
 		}else{
 			
 			var createdUser = user[0];
-		
-			delete createdUser.verficationCode;
+			deletePassAndVerificationCode(createdUser);
 		   res.send(createdUser);
-		   sendOTP(createdUser.phoneNumber, verficationCode);
+		   sendOTP(createdUser.phoneNumber, verificationCode);
 		}
 	 });
 });
 
-function sendOTP(phoneNo, verficationCode) {
+function sendOTP(phoneNo, verificationCode, responseCallback) {
 	log.info('sendOTP Phone No: ' + phoneNo);
-	var message = verficationCode+' is the Onetime password(OTP) to activate your account in fathome.in. PLS DO NOT SHARE WITH ANYONE'
+	var message = verificationCode+' is the Onetime password(OTP) to activate your account in fathome.in. PLS DO NOT SHARE WITH ANYONE'
 	var callback = function(data) {
-	
-	
-	
+		if(responseCallback) {
+			responseCallback(data);
+		}
 	}
 
 	sendSms(phoneNo, message, callback);
-
 }
 	 
 app.get('/users', function(req, res) {
@@ -125,7 +123,7 @@ app.post('/users/authenticate', function(req, res) {
 		}
 		else{
 			if(user) {
-				delete user.password;
+				deletePassAndVerificationCode(user)
 				res.send(user);
 			} else {
 				res.send(401);
@@ -134,7 +132,63 @@ app.post('/users/authenticate', function(req, res) {
 		}
 		});
 	});
+app.post('/users/account-verification', function(req, res) {
+   var  request = req.body;
+   log.info("Account verification:");
+   log.info("user Id:"+request.userId);
+   log.info("Verification code :"+request.verificationCode);
+   fatUser.findUser(request.userId, function(error, user){
+					
+		if(error){
+			log.error(error);
+			res.send(error)
+		} else {
+			if(Number(user.verificationCode) === Number(request.verificationCode)) {
+				deletePassAndVerificationCode(user);
+				res.send(user);
+				updateUser(user);
+			} else {
+				res.send(401);
+			}
+		}
+	});
+	
+	function updateUser(user) {
+		log.info("updateUser");
+		 fatUser.updateUser(user._id, {verified:true}, function(error, user){
+			if(error){
+				log.error("User update failed. Not able set verified as true");
+				log.error(error);
+			} else {
+				log.info("User update success. Updated verified as true");
+			}
+		});
+	}
+	
+});
 
+
+	
+app.get('/users/:userId/resend-otp', function(req, res) {
+	log.info("Resend OTP");
+	
+	var userId = req.params.userId;
+	log.info("user Id: " + userId);
+	
+	fatUser.findUser(userId, function(error, user){
+		if(error){
+			log.error(error);
+			res.send(error)
+		}
+		else{
+			sendOTP(user.phoneNumber, user.verificationCode, function(){
+				res.send(200);
+			});
+		}
+	});
+});
+	
+	
 app.post('/properties/register-property', function(req, res) {
     
     var properties = req.body;
@@ -648,6 +702,11 @@ app.post('/feedback', function(req, res) {
 	 });
 	 });
 
+	 function deletePassAndVerificationCode(userDetails) {
+		delete userDetails.verificationCode;
+		delete userDetails.password;
+		delete userDetails.confirmPassword;
+	 }
 
 
 http.createServer(app).listen(app.get('port'), function(){

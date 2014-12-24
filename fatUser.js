@@ -2,7 +2,7 @@ var Db = require('mongodb').Db;
 var Connection = require('mongodb').connection;
 var Server = require('mongodb').Server;
 var BSON = require('mongodb').BSON;
-var ObjectID = require('mongodb').ObjectId;
+var ObjectID = require('mongodb').ObjectID;
 
 FatUser = function(host, port){
 this.db = new Db('fatDB', new Server(host, port, {safe: false}, {auto_reconnect: true}, {}));
@@ -56,7 +56,41 @@ this.getCollection(function(error, users_collection){
 
 });
 };
+FatUser.prototype.findUser = function(userId, callback){
+	this.getCollection(function(error, users_collection){
+	  if(error) { 
+		callback(error)
+	  }
+	  else{
+		users_collection.findOne({'_id': ObjectID(userId)}, function(error, result){
+			if(error) { 
+				callback(error);
+			}
+			else {
+				callback(null, result);
+			}
+		})
+	}
 
+	});
+};
+FatUser.prototype.updateUser = function(userId, request, callback) {
+	this.getCollection(function(error, users_collection){
+	 if(error) callback(error);
+	  else{
+		users_collection.update({_id:ObjectID(userId)}, {$set: request}, function(error, user){
+				 try{
+					if(error) throw (error);
+					else{
+						callback(null, user);
+					}
+				 } catch (ex) {
+					callback(ex);
+				}
+			});
+		}
+	});
+};
 
 FatUser.prototype.list = function(callback){
 this.getCollection(function(error, users_collection){
