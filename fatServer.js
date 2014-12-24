@@ -78,7 +78,10 @@ app.post('/users', function(req, res) {
 			var createdUser = user[0];
 			deletePassAndVerificationCode(createdUser);
 		   res.send(createdUser);
-		   sendOTP(createdUser.phoneNumber, verificationCode);
+		   if(appConfig.smsConfig.sendOTPMessage) {
+				sendOTP(createdUser.phoneNumber, verificationCode);
+		   }
+		   
 		}
 	 });
 });
@@ -181,9 +184,13 @@ app.get('/users/:userId/resend-otp', function(req, res) {
 			res.send(error)
 		}
 		else{
-			sendOTP(user.phoneNumber, user.verificationCode, function(){
-				res.send(200);
-			});
+			if(appConfig.smsConfig.sendOTPMessage) {
+				sendOTP(user.phoneNumber, user.verificationCode, function(){
+					res.send(200);
+				});
+				return;
+			}
+			res.send(200);
 		}
 	});
 });

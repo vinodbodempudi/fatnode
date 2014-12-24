@@ -1,7 +1,8 @@
 { 
 	"smsConfig":{
 		"sendSmsToFatHomeSupport":true,
-		"fatHomeSupportNumber":"7396355472"
+		"fatHomeSupportNumber":"7396355472",
+		"sendOTPMessage":false
 	},
 	"logConfig":{
 		"avoidPropertyLogFor":["8121373413", "9676868738"]
