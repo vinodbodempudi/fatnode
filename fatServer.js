@@ -699,6 +699,9 @@ app.get('/', function(req, res) {
 app.post('/feedback', function(req, res) {
     
     var feedback = req.body;
+	
+	log.info('Feedback: ');
+	log.info(feedback);
 	fatFeedback.saveFeedback(feedback, function(error, feedback){
 	    if(error){
 		   log.error('could not save feedback:' + feedback+' error:'+error);
