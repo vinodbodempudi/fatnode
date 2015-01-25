@@ -13,7 +13,7 @@ FatUser.prototype.getCollection=function(callback){
 this.db.collection('users', function(error, users_collection){
    if(error) callback(error);
    else {
-      users_collection.ensureIndex({email:1, phoneNumber:1}, {unique:true}, function(error, indexName) {
+      users_collection.ensureIndex({email:1}, {unique:true}, function(error, indexName) {
 		if(error) callback(error);
 		else
 			callback(null, users_collection);
