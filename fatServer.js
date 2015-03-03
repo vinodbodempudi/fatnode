@@ -57,8 +57,11 @@ app.all('/*', function(req, res, next) {
 app.post('/users', function(req, res) {
     //log.info("inside post method");
     var user = req.body;
-	log.info(user);
 	
+	var userCopy = JSON.parse(JSON.stringify(user));
+	deletePassAndVerificationCode(userCopy)
+	
+	log.info(userCopy);
 	
 	var verificationCode=Math.floor(Math.random()*900000) + 100000;
 	user.verified = false;
