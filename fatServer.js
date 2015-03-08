@@ -172,9 +172,95 @@ app.post('/users/account-verification', function(req, res) {
 	}
 	
 });
-
-
+app.get('/users/:email/send-temporary-password', function(req, res) {
+	var email = req.params.email;
+	log.info("Send temporary password email: " + email);
+	fatUser.findUserByEmail(email, function(error, user){
+		if(error){
+			log.error(error);
+			res.send(error)
+		}
+		else{
+			if(user) {
+				if(user.tempPasswd) {
+					sendTemporaryPassword(email, user.tempPasswd);
+					res.send(200);
+					return;
+				}
+				
+				var tempPasswd = getTempPasswd(6, 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890');
+				sendTemporaryPassword(email, tempPasswd);
+				updateUser(user, tempPasswd);
+				res.send(200);
+			} else {
+				res.send(401);
+			}
+		}
+	});
 	
+	function updateUser(user, tempPasswd) {
+		log.info("updateUser with tempPasswd: " + tempPasswd);
+		 fatUser.updateUser(user._id, {tempPasswd:tempPasswd}, function(error, user){
+			if(error){
+				log.error("User update failed. Not able set verified as true");
+				log.error(error);
+			} else {
+				log.info("User update success. Updated verified as true");
+			}
+		});
+	}
+	
+	function sendTemporaryPassword(email, tempPasswd) {
+		log.info("sendTemporaryPassword email with password: " + tempPasswd + " To: " + email);
+		var subject = "Temporary Password to login in Fathome.in";
+		var body = 'Use this password to login in Fathome.in \n Password: ' + tempPasswd;
+		sendEmail(email, subject, body, function(err, data) {
+			if(err) { throw err; res.send(err); }
+			
+			log.info('Email sent:');
+			log.info(data);
+			res.send(200, data);
+		});
+		return tempPasswd;
+	}
+	
+	function getTempPasswd(n, a) {
+	  var index = (Math.random() * (a.length - 1)).toFixed(0);
+	  return n > 0 ? a[index] + getTempPasswd(n - 1, a) : '';
+	};
+});	
+app.post('/users/:email/reset-password', function(req, res) {
+	var email = req.params.email;
+	var request = req.body;
+	log.info("reset password: " + email);
+	fatUser.findUserByEmail(email, function(error, user){
+		if(error){
+			log.error(error);
+			res.send(error)
+		}
+		else{
+			if(user.tempPasswd === request.tempPasswd) {
+				updateUser(user, request);
+			} else {
+				res.send(401);
+			}
+		}
+	});
+	
+	function updateUser(user, request) {
+		log.info("updateUser new password");
+		 fatUser.updateUser(user._id, request, function(error, user){
+			if(error){
+				log.error("User update failed. Not able set new password");
+				log.error(error);
+				res.send(500);
+			} else {
+				log.info("User update success. Updated new password");
+				res.send(200);
+			}
+		});
+	};
+});	
 app.get('/users/:userId/resend-otp', function(req, res) {
 	log.info("Resend OTP");
 	
@@ -435,6 +521,39 @@ app.get('/properties', function(req, res) {
 	});
 });
 
+function sendEmail(toAddress, subject, body, callback) {
+	log.info('send-email');
+	// load AWS SES
+	var ses = new AWS.SES({apiVersion: '2010-12-01'});
+
+	// send to list
+	var to = [toAddress]
+
+	// this must relate to a verified SES account
+	var from = 'support@fathome.in'
+
+
+	// this sends the email
+	// @todo - add HTML version
+	ses.sendEmail( { 
+	   Source: from, 
+	   Destination: { ToAddresses: to },
+	   Message: {
+		   Subject: {
+			  Data: subject
+		   },
+		   Body: {
+			   Text: {
+				   Data: body,
+			   }
+			}
+	   }
+	}
+	, callback);
+
+
+}
+
  function sendSms(phoneNumber, message, responseCallback) {
  
 		var optionsget = {
@@ -506,7 +625,7 @@ app.get('/send-email', function(req, res) {
 	var to = ['rama.guntu@gmail.com']
 
 	// this must relate to a verified SES account
-	var from = 'vinodbodempudi@gmail.com'
+	var from = 'support@fathome.in'
 
 
 	// this sends the email

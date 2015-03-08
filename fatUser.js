@@ -74,6 +74,24 @@ FatUser.prototype.findUser = function(userId, callback){
 
 	});
 };
+FatUser.prototype.findUserByEmail = function(email, callback){
+	this.getCollection(function(error, users_collection){
+	  if(error) { 
+		callback(error)
+	  }
+	  else{
+		users_collection.findOne({'email':email}, function(error, result){
+			if(error) { 
+				callback(error);
+			}
+			else {
+				callback(null, result);
+			}
+		})
+	}
+
+	});
+};
 FatUser.prototype.updateUser = function(userId, request, callback) {
 	this.getCollection(function(error, users_collection){
 	 if(error) callback(error);
