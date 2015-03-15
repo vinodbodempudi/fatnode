@@ -172,7 +172,7 @@ app.post('/users/account-verification', function(req, res) {
 	}
 	
 });
-app.get('/users/:email/send-temporary-password', function(req, res) {
+app.post('/users/:email/send-temporary-password', function(req, res) {
 	var email = req.params.email;
 	log.info("Send temporary password email: " + email);
 	fatUser.findUserByEmail(email, function(error, user){
@@ -215,7 +215,12 @@ app.get('/users/:email/send-temporary-password', function(req, res) {
 		var subject = "Temporary Password to login in Fathome.in";
 		var body = 'Use this password to login in Fathome.in \n Password: ' + tempPasswd;
 		sendEmail(email, subject, body, function(err, data) {
-			if(err) { throw err; res.send(err); }
+			if(err) { 
+				log.error('Email send failed:');
+				log.error(err);
+				res.send(err.statusCode, err);
+				return;
+			}
 			
 			log.info('Email sent:');
 			log.info(data);
@@ -528,10 +533,12 @@ function sendEmail(toAddress, subject, body, callback) {
 
 	// send to list
 	var to = [toAddress]
-
+	
 	// this must relate to a verified SES account
 	var from = 'support@fathome.in'
-
+	
+	log.info('to Address: ' + toAddress);
+	log.info('from Address: ' + from);
 
 	// this sends the email
 	// @todo - add HTML version
@@ -544,7 +551,7 @@ function sendEmail(toAddress, subject, body, callback) {
 		   },
 		   Body: {
 			   Text: {
-				   Data: body,
+				   Data: body
 			   }
 			}
 	   }
