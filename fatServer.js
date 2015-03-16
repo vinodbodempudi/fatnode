@@ -7,6 +7,7 @@ var express = require('express');
 var logger = require('morgan');
 var http = require('http');
 var path = require('path');
+var nodemailer = require("nodemailer");
 var app = express();
 var favicon = require('static-favicon');
 var logger = require('morgan');
@@ -47,6 +48,16 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb'}));
 app.use(cookieParser());
 app.use('/static', express.static(__dirname + '/public'));
+
+var smtpTransport = nodemailer.createTransport("SMTP",{
+   host: appConfig.sesCredentails.host,
+   secureConnection: true, // use SSL
+   port: 465,
+   auth: {
+       user: appConfig.sesCredentails.userName,
+       pass: appConfig.sesCredentails.password
+   }
+});
 
 app.all('/*', function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -218,7 +229,7 @@ app.post('/users/:email/send-temporary-password', function(req, res) {
 			if(err) { 
 				log.error('Email send failed:');
 				log.error(err);
-				res.send(err.statusCode, err);
+				res.send(500, err);
 				return;
 			}
 			
@@ -245,6 +256,7 @@ app.post('/users/:email/reset-password', function(req, res) {
 		}
 		else{
 			if(user.tempPasswd === request.tempPasswd) {
+				request.tempPasswd = "";
 				updateUser(user, request);
 			} else {
 				res.send(401);
@@ -528,37 +540,22 @@ app.get('/properties', function(req, res) {
 
 function sendEmail(toAddress, subject, body, callback) {
 	log.info('send-email');
-	// load AWS SES
-	var ses = new AWS.SES({apiVersion: '2010-12-01'});
 
 	// send to list
 	var to = [toAddress]
 	
 	// this must relate to a verified SES account
-	var from = 'support@fathome.in'
+	var from = appConfig.sesCredentails.from
 	
 	log.info('to Address: ' + toAddress);
 	log.info('from Address: ' + from);
 
-	// this sends the email
-	// @todo - add HTML version
-	ses.sendEmail( { 
-	   Source: from, 
-	   Destination: { ToAddresses: to },
-	   Message: {
-		   Subject: {
-			  Data: subject
-		   },
-		   Body: {
-			   Text: {
-				   Data: body
-			   }
-			}
-	   }
-	}
-	, callback);
-
-
+	smtpTransport.sendMail({
+	   from: from, // sender address
+	   to: toAddress, // comma separated list of receivers
+	   subject: subject, // Subject line
+	   text: body // plaintext body
+	}, callback);
 }
 
  function sendSms(phoneNumber, message, responseCallback) {
@@ -621,44 +618,6 @@ app.post('/send-sms', function(req, res) {
 		var message = "fathome.in inquiry on "+request.propertyUrl+" please call on "+request.phoneNumber;
 		sendSms(request.toPhoneNumbers[i], message, sendResponse);
 	}
-});
-
-app.get('/send-email', function(req, res) {
-	log.info('send-email');
-	// load AWS SES
-	var ses = new AWS.SES({apiVersion: '2010-12-01'});
-
-	// send to list
-	var to = ['rama.guntu@gmail.com']
-
-	// this must relate to a verified SES account
-	var from = 'support@fathome.in'
-
-
-	// this sends the email
-	// @todo - add HTML version
-	ses.sendEmail( { 
-	   Source: from, 
-	   Destination: { ToAddresses: to },
-	   Message: {
-		   Subject: {
-			  Data: 'A Message To You Rudy'
-		   },
-		   Body: {
-			   Text: {
-				   Data: 'Stop your messing around',
-			   }
-			}
-	   }
-	}
-	, function(err, data) {
-		if(err) throw err
-			log.info('Email sent:');
-			log.info(data);
-		res.send(200, data);
-	 });
- 
-    
 });
 
 app.post('/user-details', function(req, res) {

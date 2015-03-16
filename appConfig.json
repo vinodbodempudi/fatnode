@@ -6,5 +6,11 @@
 	},
 	"logConfig":{
 		"avoidPropertyLogFor":["8121373413", "9676868738"]
+	},
+	"sesCredentails":{
+		"host":"email-smtp.us-east-1.amazonaws.com",
+		"userName":"AKIAJVEF43SGA4UVWXLA",
+		"password":"Ane5NpTHT/2p6r72rGGN4bwqzGkJ457Yg1Jbcwkcnpjt",
+		"from":"admin@fathome.in"
 	}
  }
